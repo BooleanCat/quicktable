@@ -9,6 +9,23 @@ static void qtab_Table_dealloc(qtab_Table *self) {
   Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
+static Py_ssize_t qtab_Table_length(qtab_Table *self) {
+  return 0;
+}
+
+static PySequenceMethods qtab_Table_as_sequence = {
+  (lenfunc)qtab_Table_length,  // sq_length
+  0,  // sq_concat
+  0,  // sq_repeat
+  0,  // sq_item
+  0,  // sq_slice
+  0,  // sq_ass_item
+  0,  // sq_ass_slice
+  0,  // sq_contains
+  0,  // sq_inplace_concat
+  0,  // sq_inplace_repeat
+};
+
 PyTypeObject qtab_TableType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "quicktable.Table",  // tp_name
@@ -21,7 +38,7 @@ PyTypeObject qtab_TableType = {
     0,  // tp_reserved
     0,  // tp_repr
     0,  // tp_as_number
-    0,  // tp_as_sequence
+    &qtab_Table_as_sequence,  // tp_as_sequence
     0,  // tp_as_mapping
     0,  // tp_hash
     0,  // tp_call
