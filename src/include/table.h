@@ -6,6 +6,7 @@
 
 typedef struct {
     PyObject_HEAD
+    Py_ssize_t size;
 } qtab_Table;
 
 #endif

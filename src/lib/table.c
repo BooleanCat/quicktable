@@ -2,7 +2,13 @@
 
 static PyObject *
 qtab_Table_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
-  return type->tp_alloc(type, 0);
+  qtab_Table *self;
+
+  self = (qtab_Table *)type->tp_alloc(type, 0);
+  if (self != NULL)
+    self->size = 0;
+
+  return (PyObject *)self;
 }
 
 static void qtab_Table_dealloc(qtab_Table *self) {
@@ -10,7 +16,7 @@ static void qtab_Table_dealloc(qtab_Table *self) {
 }
 
 static Py_ssize_t qtab_Table_length(qtab_Table *self) {
-  return 0;
+  return self->size;
 }
 
 static PySequenceMethods qtab_Table_as_sequence = {
@@ -24,6 +30,16 @@ static PySequenceMethods qtab_Table_as_sequence = {
   0,  // sq_contains
   0,  // sq_inplace_concat
   0,  // sq_inplace_repeat
+};
+
+static PyObject *qtab_Table_append(qtab_Table *self) {
+  self->size++;
+  Py_RETURN_NONE;
+}
+
+static PyMethodDef qtab_Table_methods[] = {
+  {"append", (PyCFunction)qtab_Table_append, METH_NOARGS, "append"},
+  {NULL, NULL}
 };
 
 PyTypeObject qtab_TableType = {
@@ -54,7 +70,7 @@ PyTypeObject qtab_TableType = {
     0,  // tp_weaklistoffset
     0,  // tp_iter
     0,  // tp_iternext
-    0,  // tp_methods
+    qtab_Table_methods,  // tp_methods
     0,  // tp_members
     0,  // tp_getset
     0,  // tp_base
