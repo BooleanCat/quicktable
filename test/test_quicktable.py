@@ -40,3 +40,10 @@ def test_pop_empty_table_raises_error():
     with pytest.raises(IndexError) as excinfo:
         table.pop()
     assert str(excinfo.value) == 'pop from empty table'
+
+
+def test_pop_empty_table_keeps_len_same():
+    table = quicktable.Table()
+    with pytest.raises(IndexError) as excinfo:
+        table.pop()
+    assert len(table) == 0
