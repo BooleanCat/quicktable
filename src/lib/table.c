@@ -38,6 +38,11 @@ static PyObject *qtab_Table_append(qtab_Table *self) {
 }
 
 static PyObject *qtab_Table_pop(qtab_Table *self) {
+  if (self->size == 0) {
+    PyErr_SetString(PyExc_IndexError, "pop from empty table");
+    return NULL;
+  }
+
   self->size--;
   Py_RETURN_NONE;
 }
