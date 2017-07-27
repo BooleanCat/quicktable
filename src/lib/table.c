@@ -37,8 +37,14 @@ static PyObject *qtab_Table_append(qtab_Table *self) {
   Py_RETURN_NONE;
 }
 
+static PyObject *qtab_Table_pop(qtab_Table *self) {
+  self->size--;
+  Py_RETURN_NONE;
+}
+
 static PyMethodDef qtab_Table_methods[] = {
   {"append", (PyCFunction)qtab_Table_append, METH_NOARGS, "append"},
+  {"pop", (PyCFunction)qtab_Table_pop, METH_NOARGS, "pop"},
   {NULL, NULL}
 };
 
