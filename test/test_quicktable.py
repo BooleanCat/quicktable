@@ -66,3 +66,9 @@ def test_column_names_not_setable(empty_table):
 
 def test_empty_table_column_names_is_empty_tuple(empty_table):
     assert empty_table.column_names == tuple()
+
+
+def test_invalid_blueprint():
+    with pytest.raises(TypeError) as excinfo:
+        quicktable.Table(None)
+    assert str(excinfo.value) == 'invalid blueprint'

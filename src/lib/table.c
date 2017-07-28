@@ -21,6 +21,11 @@ static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
   if (!PyArg_ParseTuple(args, "O|", &blueprint))
     return -1;
 
+  if (PySequence_Check(blueprint) != 1) {
+    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
+    return -1;
+  }
+
   return 0;
 }
 
