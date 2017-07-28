@@ -15,6 +15,15 @@ static void qtab_Table_dealloc(qtab_Table *self) {
   Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
+static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
+  PyObject *blueprint = NULL;
+
+  if (!PyArg_ParseTuple(args, "O|", &blueprint))
+    return -1;
+
+  return 0;
+}
+
 static Py_ssize_t qtab_Table_length(qtab_Table *self) {
   return self->size;
 }
@@ -89,7 +98,7 @@ PyTypeObject qtab_TableType = {
     0,  // tp_descr_get
     0,  // tp_descr_set
     0,  // tp_dictoffset
-    0,  // tp_init
+    (initproc)qtab_Table_init,  // tp_init
     0,  // tp_alloc
     qtab_Table_new  // tp_new
 };
