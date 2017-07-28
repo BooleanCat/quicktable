@@ -56,3 +56,13 @@ def test_tables_with_no_blueprint_raises_exception():
     with pytest.raises(TypeError) as excinfo:
         quicktable.Table()
     assert str(excinfo.value) == 'function takes exactly 1 argument (0 given)'
+
+
+def test_column_names_not_setable(empty_table):
+    with pytest.raises(AttributeError) as excinfo:
+        empty_table.column_names = None
+    assert str(excinfo.value) == "attribute 'column_names' of 'quicktable.Table' objects is not writable"
+
+
+def test_empty_table_column_names_is_empty_tuple(empty_table):
+    assert empty_table.column_names == tuple()

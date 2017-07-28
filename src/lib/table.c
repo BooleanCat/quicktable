@@ -62,6 +62,15 @@ static PyMethodDef qtab_Table_methods[] = {
   {NULL, NULL}
 };
 
+static PyObject *qtab_Table_column_names(qtab_Table *self, void *closure) {
+  return PyTuple_New(0);
+}
+
+static PyGetSetDef qtab_table_getsetters[] = {
+  {"column_names", (getter)qtab_Table_column_names, NULL, "column names", NULL},
+  {NULL}
+};
+
 PyTypeObject qtab_TableType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "quicktable.Table",  // tp_name
@@ -92,7 +101,7 @@ PyTypeObject qtab_TableType = {
     0,  // tp_iternext
     qtab_Table_methods,  // tp_methods
     0,  // tp_members
-    0,  // tp_getset
+    qtab_table_getsetters,  // tp_getset
     0,  // tp_base
     0,  // tp_dict
     0,  // tp_descr_get
