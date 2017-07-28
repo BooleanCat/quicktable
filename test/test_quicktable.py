@@ -2,8 +2,13 @@ import pytest
 import quicktable
 
 
-def test_empty_table_has_len_0():
-    assert len(quicktable.Table([])) == 0
+@pytest.fixture
+def empty_table():
+    return quicktable.Table([])
+
+
+def test_empty_table_has_len_0(empty_table):
+    assert len(empty_table) == 0
 
 
 def test_append_increments_length():
@@ -35,22 +40,16 @@ def test_pop_decrements_length_twice():
     assert len(table) == 0
 
 
-def test_pop_empty_table_raises_exception():
-    table = quicktable.Table([])
+def test_pop_empty_table_raises_exception(empty_table):
     with pytest.raises(IndexError) as excinfo:
-        table.pop()
+        empty_table.pop()
     assert str(excinfo.value) == 'pop from empty table'
 
 
-def test_pop_empty_table_keeps_len_same():
-    table = quicktable.Table([])
+def test_pop_empty_table_keeps_len_same(empty_table):
     with pytest.raises(IndexError) as excinfo:
-        table.pop()
-    assert len(table) == 0
-
-
-def test_table_accepts_empty_blueprint():
-    quicktable.Table([])
+        empty_table.pop()
+    assert len(empty_table) == 0
 
 
 def test_tables_with_no_blueprint_raises_exception():
