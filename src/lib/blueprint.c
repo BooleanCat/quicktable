@@ -3,6 +3,7 @@
 static bool qtab_validate_descriptor(PyObject *descriptor) {
   int is_sequence;
   Py_ssize_t len;
+  PyObject *name;
 
   is_sequence = PySequence_Check(descriptor);
 
@@ -18,6 +19,17 @@ static bool qtab_validate_descriptor(PyObject *descriptor) {
     PyErr_SetString(PyExc_TypeError, "invalid blueprint");
     return false;
   }
+
+  if ((name = PySequence_ITEM(descriptor, 0)) == NULL)
+    return false;
+
+  if (PyUnicode_Check(name) == 0) {
+    Py_DECREF(name);
+    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
+    return false;
+  }
+
+  Py_DECREF(name);
 
   return true;
 }

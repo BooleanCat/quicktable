@@ -28,3 +28,15 @@ def test_length_of_column_descriptor_not_two_is_invalid():
     with pytest.raises(TypeError) as excinfo:
         quicktable.Table([('Name')])
     assert str(excinfo.value) == 'invalid blueprint'
+
+
+def test_column_name_not_string():
+    with pytest.raises(TypeError) as excinfo:
+        quicktable.Table([(None, 'str')])
+    assert str(excinfo.value) == 'invalid blueprint'
+
+
+def test_second_column_name_not_string():
+    with pytest.raises(TypeError) as excinfo:
+        quicktable.Table([('Name', 'str'), (None, 'str')])
+    assert str(excinfo.value) == 'invalid blueprint'
