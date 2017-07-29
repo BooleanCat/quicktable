@@ -2,7 +2,7 @@ from setuptools import setup, Extension
 
 quicktable = Extension(
     'quicktable',
-    ['src/lib/quicktable.c', 'src/lib/table.c'],
+    ['src/lib/quicktable.c', 'src/lib/table.c', 'src/lib/blueprint.c'],
 )
 
 setup(

@@ -3,6 +3,8 @@
 
 #include <Python.h>
 #include "structmember.h"
+#include "blueprint.h"
+#include <stdbool.h>
 
 typedef struct {
     PyObject_HEAD
