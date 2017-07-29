@@ -17,6 +17,9 @@ static void qtab_Table_dealloc(qtab_Table *self) {
 
 static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
   PyObject *blueprint = NULL;
+  Py_ssize_t blueprint_len;
+  Py_ssize_t blueprint_index;
+  PyObject *column_descriptor = NULL;
 
   if (!PyArg_ParseTuple(args, "O|", &blueprint))
     return -1;
@@ -24,6 +27,22 @@ static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
   if (PySequence_Check(blueprint) != 1) {
     PyErr_SetString(PyExc_TypeError, "invalid blueprint");
     return -1;
+  }
+
+  if ((blueprint_len = PySequence_Size(blueprint)) == -1)
+    return -1;
+
+  for (blueprint_index = 0; blueprint_index < blueprint_len; blueprint_index++) {
+    if ((column_descriptor = PySequence_ITEM(blueprint, blueprint_index)) == NULL)
+      return -1;
+
+    if (PySequence_Check(column_descriptor) != 1) {
+      Py_DECREF(column_descriptor);
+      PyErr_SetString(PyExc_TypeError, "invalid blueprint");
+      return -1;
+    }
+
+    Py_DECREF(column_descriptor);
   }
 
   return 0;
