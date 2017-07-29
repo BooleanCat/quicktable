@@ -22,3 +22,9 @@ def test_non_sequence_column_descriptor_is_invalid():
     with pytest.raises(TypeError) as excinfo:
         quicktable.Table([None])
     assert str(excinfo.value) == 'invalid blueprint'
+
+
+def test_length_of_column_descriptor_not_two_is_invalid():
+    with pytest.raises(TypeError) as excinfo:
+        quicktable.Table([('Name')])
+    assert str(excinfo.value) == 'invalid blueprint'
