@@ -1,9 +1,39 @@
 #include "blueprint.h"
 
+static bool qtab_validate_column_name(PyObject *descriptor) {
+  PyObject *name;
+  bool valid = true;
+
+  if ((name = PySequence_ITEM(descriptor, 0)) == NULL)
+    return false;
+
+  if (PyUnicode_Check(name) == 0) {
+    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
+    valid = false;
+  }
+
+  Py_DECREF(name);
+  return valid;
+}
+
+static bool qtab_validate_column_type(PyObject *descriptor) {
+  PyObject *type;
+  bool valid = true;
+
+  if ((type = PySequence_ITEM(descriptor, 1)) == NULL)
+    return false;
+
+  if (PyUnicode_Check(type) == 0) {
+    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
+    valid = false;
+  }
+
+  Py_DECREF(type);
+  return valid;
+}
+
 static bool qtab_validate_descriptor(PyObject *descriptor) {
   Py_ssize_t len;
-  PyObject *name;
-  PyObject *type;
 
   if (PySequence_Check(descriptor) != 1) {
     PyErr_SetString(PyExc_TypeError, "invalid blueprint");
@@ -18,29 +48,10 @@ static bool qtab_validate_descriptor(PyObject *descriptor) {
     return false;
   }
 
-  if ((name = PySequence_ITEM(descriptor, 0)) == NULL)
+  if (qtab_validate_column_name(descriptor) == false)
     return false;
 
-  if (PyUnicode_Check(name) == 0) {
-    Py_DECREF(name);
-    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
-    return false;
-  }
-
-  Py_DECREF(name);
-
-  if ((type = PySequence_ITEM(descriptor, 1)) == NULL)
-    return false;
-
-  if (PyUnicode_Check(type) == 0) {
-    Py_DECREF(type);
-    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
-    return false;
-  }
-
-  Py_DECREF(type);
-
-  return true;
+  return qtab_validate_column_type(descriptor);
 }
 
 bool qtab_validate_blueprint(PyObject *blueprint) {
