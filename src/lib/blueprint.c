@@ -1,5 +1,12 @@
 #include "blueprint.h"
 
+static const char *qtab_valid_column_types[] = {
+  "str",
+  "int",
+  "bool",
+  "float",
+};
+
 static bool qtab_validate_column_name(PyObject *descriptor) {
   PyObject *name;
   bool valid = true;
@@ -16,6 +23,19 @@ static bool qtab_validate_column_name(PyObject *descriptor) {
   return valid;
 }
 
+static bool qtab_valid_column_types_contains(PyObject *type) {
+  bool contained = false;
+
+  for (size_t i = 0; i < 4; i++) {
+    if(PyUnicode_CompareWithASCIIString(type, qtab_valid_column_types[i]) == 0) {
+      contained = true;
+      break;
+    }
+  }
+
+  return contained;
+}
+
 static bool qtab_validate_column_type(PyObject *descriptor) {
   PyObject *type;
   bool valid = true;
@@ -23,7 +43,7 @@ static bool qtab_validate_column_type(PyObject *descriptor) {
   if ((type = PySequence_ITEM(descriptor, 1)) == NULL)
     return false;
 
-  if (PyUnicode_Check(type) == 0) {
+  if (PyUnicode_Check(type) == 0 || !qtab_valid_column_types_contains(type)) {
     PyErr_SetString(PyExc_TypeError, "invalid blueprint");
     valid = false;
   }
