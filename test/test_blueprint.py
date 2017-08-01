@@ -40,3 +40,15 @@ def test_second_column_name_not_string():
     with pytest.raises(TypeError) as excinfo:
         quicktable.Table([('Name', 'str'), (None, 'str')])
     assert str(excinfo.value) == 'invalid blueprint'
+
+
+def test_column_type_not_string():
+    with pytest.raises(TypeError) as excinfo:
+        quicktable.Table([('Name', None)])
+    assert str(excinfo.value) == 'invalid blueprint'
+
+
+def test_second_column_type_not_string():
+    with pytest.raises(TypeError) as excinfo:
+        quicktable.Table([('Name', 'str'), ('Level', None)])
+    assert str(excinfo.value) == 'invalid blueprint'
