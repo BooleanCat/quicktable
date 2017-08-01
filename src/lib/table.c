@@ -65,12 +65,12 @@ static PyMethodDef qtab_Table_methods[] = {
   {NULL, NULL}
 };
 
-static PyObject *qtab_Table_column_names(qtab_Table *self, void *closure) {
+static PyObject *qtab_Table_columns(qtab_Table *self, void *closure) {
   return PyTuple_New(0);
 }
 
 static PyGetSetDef qtab_table_getsetters[] = {
-  {"column_names", (getter)qtab_Table_column_names, NULL, "column names", NULL},
+  {"columns", (getter)qtab_Table_columns, NULL, "column names", NULL},
   {NULL}
 };
 
