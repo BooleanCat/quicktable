@@ -75,7 +75,6 @@ static bool qtab_validate_descriptor(PyObject *descriptor) {
 }
 
 bool qtab_validate_blueprint(PyObject *blueprint) {
-  Py_ssize_t i;
   Py_ssize_t len;
   PyObject *descriptor;
   bool valid_descriptor;
@@ -88,7 +87,7 @@ bool qtab_validate_blueprint(PyObject *blueprint) {
   if ((len = PySequence_Size(blueprint)) == -1)
     return -1;
 
-  for (i = 0; i < len; i++) {
+  for (Py_ssize_t i = 0; i < len; i++) {
     if ((descriptor = PySequence_ITEM(blueprint, i)) == NULL)
       return false;
 
