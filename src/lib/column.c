@@ -33,29 +33,21 @@ static bool qtab_Column_init_type(qtab_Column *column, PyObject *type) {
 }
 
 bool qtab_Column_init(qtab_Column *column, PyObject *descriptor) {
-  PyObject *name;
-  PyObject *type;
-  bool success;
+  PyObject *fast_descriptor;
+  bool success = true;
 
-  name = PySequence_ITEM(descriptor, 0);
-  if (name == NULL)
+  fast_descriptor = PySequence_Fast(descriptor, "descriptor not a sequence");
+  if (fast_descriptor == NULL)
     return false;
 
-  success = qtab_Column_init_name(column, name);
-  Py_DECREF(name);
-  if (success == false)
-    return false;
+  if (
+    qtab_Column_init_name(column, PySequence_Fast_GET_ITEM(fast_descriptor, 0)) == false ||
+    qtab_Column_init_type(column, PySequence_Fast_GET_ITEM(fast_descriptor, 1)) == false
+  )
+    success = false;
 
-  type = PySequence_ITEM(descriptor, 1);
-  if (type == NULL)
-    return false;
-
-  success = qtab_Column_init_type(column, type);
-  Py_DECREF(type);
-  if (success == false)
-    return false;
-
-  return true;
+  Py_DECREF(fast_descriptor);
+  return success;
 }
 
 void qtab_Column_dealloc(qtab_Column *column) {
