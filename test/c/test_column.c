@@ -61,24 +61,45 @@ static void test_qtab_Column_init_sets_column_type(void **state) {
   qtab_Column_dealloc(&column);
 }
 
-static void test_qtab_Column_init_does_not_change_descriptor_refcounts(void **state) {
+static void test_qtab_Column_init_does_not_change_descriptor_refcount(void **state) {
   qtab_Column column;
   PyObject *descriptor;
   Py_ssize_t descriptor_ref_count;
-  Py_ssize_t name_ref_count;
-  Py_ssize_t type_ref_count;
 
   descriptor = ((TestState *)(*state))->descriptor;
-
   descriptor_ref_count = Py_REFCNT(descriptor);
-  name_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 0));
-  type_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1));
 
-  qtab_Column_init(&column, ((TestState *)(*state))->descriptor);
+  qtab_Column_init(&column, descriptor);
   qtab_Column_dealloc(&column);
 
   assert_int_equal(descriptor_ref_count, Py_REFCNT(descriptor));
+}
+
+static void test_qtab_Column_init_does_not_change_name_refcount(void **state) {
+  qtab_Column column;
+  PyObject *descriptor;
+  Py_ssize_t name_ref_count;
+
+  descriptor = ((TestState *)(*state))->descriptor;
+  name_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 0));
+
+  qtab_Column_init(&column, descriptor);
+  qtab_Column_dealloc(&column);
+
   assert_int_equal(name_ref_count, Py_REFCNT(PyTuple_GET_ITEM(descriptor, 0)));
+}
+
+static void test_qtab_Column_init_does_not_change_type_refcount(void **state) {
+  qtab_Column column;
+  PyObject *descriptor;
+  Py_ssize_t type_ref_count;
+
+  descriptor = ((TestState *)(*state))->descriptor;
+  type_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1));
+
+  qtab_Column_init(&column, descriptor);
+  qtab_Column_dealloc(&column);
+
   assert_int_equal(type_ref_count, Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1)));
 }
 
@@ -89,7 +110,9 @@ int main(void) {
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_returns_true, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_sets_column_name, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_sets_column_type, setup, teardown),
-    cmocka_unit_test_setup_teardown(test_qtab_Column_init_does_not_change_descriptor_refcounts, setup, teardown),
+    cmocka_unit_test_setup_teardown(test_qtab_Column_init_does_not_change_descriptor_refcount, setup, teardown),
+    cmocka_unit_test_setup_teardown(test_qtab_Column_init_does_not_change_name_refcount, setup, teardown),
+    cmocka_unit_test_setup_teardown(test_qtab_Column_init_does_not_change_type_refcount, setup, teardown),
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
