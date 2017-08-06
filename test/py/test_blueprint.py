@@ -1,3 +1,4 @@
+import sys
 import pytest
 import quicktable
 
@@ -67,3 +68,11 @@ def test_invalid_column_type():
     with pytest.raises(TypeError) as excinfo:
         quicktable.Table([('Name', 'Foo')])
     assert str(excinfo.value) == 'invalid blueprint'
+
+
+def test_table_does_not_hold_reference_to_blueprint():
+    blueprint = [('Name', 'str'), ('Level', 'int')]
+    ref_count = sys.getrefcount(blueprint)
+
+    table = quicktable.Table(blueprint)
+    assert ref_count == sys.getrefcount(blueprint)
