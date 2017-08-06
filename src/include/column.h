@@ -1,5 +1,5 @@
-#ifndef QTAB_BLUEPRINT_H
-#define QTAB_BLUEPRINT_H
+#ifndef QTAB_COLUMN_H
+#define QTAB_COLUMN_H
 
 #include <stdbool.h>
 #include <Python.h>
