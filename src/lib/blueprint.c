@@ -77,14 +77,16 @@ static bool qtab_validate_descriptor(PyObject *descriptor) {
 bool qtab_validate_blueprint(PyObject *blueprint) {
   Py_ssize_t len;
   PyObject *fast_blueprint;
-  bool valid_descriptor;
+  bool valid_descriptor = true;
+
+  if ((len = PySequence_Size(blueprint)) == -1) {
+    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
+    return false;
+  }
 
   fast_blueprint = PySequence_Fast(blueprint, "invalid blueprint");
   if (fast_blueprint == NULL)
     return false;
-
-  if ((len = PySequence_Fast_GET_SIZE(blueprint)) == -1)
-    return -1;
 
   for (Py_ssize_t i = 0; i < len; i++) {
     valid_descriptor = qtab_validate_descriptor(PySequence_Fast_GET_ITEM(fast_blueprint, i));
