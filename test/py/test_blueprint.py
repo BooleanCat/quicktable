@@ -89,5 +89,5 @@ def test_table_blueprint_not_setable(empty_table):
     assert str(excinfo.value) == "attribute 'blueprint' of 'quicktable.Table' objects is not writable"
 
 
-def test_empty_table_blueprint_is_empty_tuple(empty_table):
-    assert empty_table.blueprint == tuple()
+def test_empty_table_blueprint_is_empty_list(empty_table):
+    assert empty_table.blueprint == []

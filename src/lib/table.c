@@ -66,7 +66,7 @@ static PyMethodDef qtab_Table_methods[] = {
 };
 
 static PyObject *qtab_Table_blueprint(qtab_Table *self, void *closure) {
-  return PyTuple_New(0);
+  return PyList_New(0);
 }
 
 static PyGetSetDef qtab_table_getsetters[] = {
