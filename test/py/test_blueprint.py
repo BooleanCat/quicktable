@@ -91,3 +91,34 @@ def test_table_blueprint_not_setable(empty_table):
 
 def test_empty_table_blueprint_is_empty_list(empty_table):
     assert empty_table.blueprint == []
+
+
+def test_table_blueprint():
+    blueprint = [('Name', 'str')]
+    table = quicktable.Table(blueprint)
+
+    assert blueprint == table.blueprint
+
+
+def test_table_blueprint_complicated():
+    blueprint = [
+        ('Name', 'str'),
+        ('Level', 'int'),
+        ('Wild', 'bool'),
+        ('Power', 'float'),
+    ]
+    table = quicktable.Table(blueprint)
+
+    assert blueprint == table.blueprint
+
+
+def test_table_blueprint_is_copy_of_blueprint():
+    blueprint = [
+        ('Name', 'str'),
+        ('Level', 'int'),
+        ('Wild', 'bool'),
+        ('Power', 'float'),
+    ]
+    table = quicktable.Table(blueprint)
+
+    assert blueprint is not table.blueprint

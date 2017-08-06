@@ -5,23 +5,61 @@ qtab_Table_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
   qtab_Table *self;
 
   self = (qtab_Table *)type->tp_alloc(type, 0);
-  if (self != NULL)
+  if (self != NULL) {
     self->size = 0;
+    self->width = 0;
+    self->columns = NULL;
+  }
 
   return (PyObject *)self;
 }
 
 static void qtab_Table_dealloc(qtab_Table *self) {
+  for (Py_ssize_t i = 0; i < self->width; i++)
+    qtab_Column_dealloc(&self->columns[i]);
+
+  free(self->columns);
   Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
   PyObject *blueprint = NULL;
+  PyObject *descriptor = NULL;
+  bool success = true;
 
   if (!PyArg_ParseTuple(args, "O|", &blueprint))
     return -1;
 
   if (qtab_validate_blueprint(blueprint) == false)
+    return -1;
+
+  self->width = PySequence_Size(blueprint);
+  if (self->width == -1)
+    return -1;
+
+  self->columns = (qtab_Column *)malloc(sizeof(qtab_Column) * self->width);
+  if (self->columns == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "failed to initialise table");
+    return -1;
+  }
+
+  for (Py_ssize_t i = 0; i < self->width; i++) {
+    descriptor = PySequence_GetItem(blueprint, i);
+    if (descriptor == NULL) {
+      success = false;
+      break;
+    }
+
+    if ((qtab_Column_init(&self->columns[i], descriptor)) == false) {
+      success = false;
+      Py_DECREF(descriptor);
+      break;
+    }
+
+    Py_DECREF(descriptor);
+  }
+
+  if (success == false)
     return -1;
 
   return 0;
@@ -66,7 +104,24 @@ static PyMethodDef qtab_Table_methods[] = {
 };
 
 static PyObject *qtab_Table_blueprint(qtab_Table *self, void *closure) {
-  return PyList_New(0);
+  PyObject *blueprint = NULL;
+  PyObject *descriptor = NULL;
+
+  blueprint = PyList_New(self->width);
+  if (blueprint == NULL)
+    return NULL;
+
+  for (Py_ssize_t i = 0; i < self->width; i++) {
+    descriptor = qtab_Column_as_descriptor(&self->columns[i]);
+    if (descriptor == NULL) {
+      Py_DECREF(blueprint);
+      return NULL;
+    }
+
+    PyList_SET_ITEM(blueprint, i, descriptor);
+  }
+
+  return blueprint;
 }
 
 static PyGetSetDef qtab_table_getsetters[] = {

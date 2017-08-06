@@ -4,11 +4,14 @@
 #include <Python.h>
 #include "structmember.h"
 #include "blueprint.h"
+#include "column.h"
 #include <stdbool.h>
 
 typedef struct {
     PyObject_HEAD
     Py_ssize_t size;
+    Py_ssize_t width;
+    qtab_Column *columns;
 } qtab_Table;
 
 #endif
