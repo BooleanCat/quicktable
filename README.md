@@ -51,7 +51,7 @@ row = table.pop()
 table = table.sort('Name')
 print(table)
 len(table)
-table.columns
+table.blueprint
 table[0]
 table[:5]
 ```

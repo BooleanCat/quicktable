@@ -3,6 +3,11 @@ import pytest
 import quicktable
 
 
+@pytest.fixture
+def empty_table():
+    return quicktable.Table([])
+
+
 def test_empty_blueprint_is_allowed():
     quicktable.Table([])
 
@@ -76,3 +81,13 @@ def test_table_does_not_hold_reference_to_blueprint():
 
     table = quicktable.Table(blueprint)
     assert ref_count == sys.getrefcount(blueprint)
+
+
+def test_table_blueprint_not_setable(empty_table):
+    with pytest.raises(AttributeError) as excinfo:
+        empty_table.blueprint = None
+    assert str(excinfo.value) == "attribute 'blueprint' of 'quicktable.Table' objects is not writable"
+
+
+def test_empty_table_blueprint_is_empty_tuple(empty_table):
+    assert empty_table.blueprint == tuple()

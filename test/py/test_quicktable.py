@@ -50,13 +50,3 @@ def test_pop_empty_table_keeps_len_same(empty_table):
     with pytest.raises(IndexError) as excinfo:
         empty_table.pop()
     assert len(empty_table) == 0
-
-
-def test_columns_not_setable(empty_table):
-    with pytest.raises(AttributeError) as excinfo:
-        empty_table.columns = None
-    assert str(excinfo.value) == "attribute 'columns' of 'quicktable.Table' objects is not writable"
-
-
-def test_empty_table_columns_is_empty_tuple(empty_table):
-    assert empty_table.columns == tuple()
