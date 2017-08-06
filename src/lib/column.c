@@ -53,15 +53,21 @@ bool qtab_Column_init(qtab_Column *column, PyObject *descriptor) {
 bool qtab_Column_init_many(qtab_Column *columns, PyObject *blueprint, Py_ssize_t n) {
   PyObject *fast_blueprint = NULL;
   bool success = true;
+  Py_ssize_t i;
 
   if ((fast_blueprint = PySequence_Fast(blueprint, "failed to initialise table")) == NULL)
     return NULL;
 
-  for (Py_ssize_t i = 0; i < n; i++) {
+  for (i = 0; i < n; i++) {
     if (qtab_Column_init(&columns[i], PySequence_Fast_GET_ITEM(fast_blueprint, i)) == false) {
       success = false;
       break;
     }
+  }
+
+  if (success == false) {
+    for (Py_ssize_t j = i - 1; i >= 0; i--)
+      qtab_Column_dealloc(&columns[j]);
   }
 
   Py_DECREF(fast_blueprint);
