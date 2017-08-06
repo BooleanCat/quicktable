@@ -24,8 +24,6 @@ static void qtab_Table_dealloc(qtab_Table *self) {
 
 static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
   PyObject *blueprint = NULL;
-  PyObject *descriptor = NULL;
-  bool success = true;
 
   if (!PyArg_ParseTuple(args, "O|", &blueprint))
     return -1;
@@ -43,24 +41,10 @@ static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
     return -1;
   }
 
-  for (Py_ssize_t i = 0; i < self->width; i++) {
-    descriptor = PySequence_GetItem(blueprint, i);
-    if (descriptor == NULL) {
-      success = false;
-      break;
-    }
-
-    if ((qtab_Column_init(&self->columns[i], descriptor)) == false) {
-      success = false;
-      Py_DECREF(descriptor);
-      break;
-    }
-
-    Py_DECREF(descriptor);
-  }
-
-  if (success == false)
+  if (qtab_Column_init_many(self->columns, blueprint, self->width) == false) {
+    free(self->columns);
     return -1;
+  }
 
   return 0;
 }
