@@ -103,6 +103,34 @@ static void test_qtab_Column_init_does_not_change_type_refcount(void **state) {
   assert_int_equal(type_ref_count, Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1)));
 }
 
+static void test_qtab_Column_as_descriptor_creates_descriptor(void **state) {
+  qtab_Column column;
+  PyObject *descriptor;
+  PyObject *new_descriptor;
+
+  descriptor = ((TestState *)(*state))->descriptor;
+
+  qtab_Column_init(&column, descriptor);
+  new_descriptor = qtab_Column_as_descriptor(&column);
+  qtab_Column_dealloc(&column);
+
+  assert_int_equal(PyTuple_Size(new_descriptor), 2);
+  assert_int_equal(1, PyUnicode_Check(PyTuple_GET_ITEM(new_descriptor, 0)));
+  assert_int_equal(1, PyUnicode_Check(PyTuple_GET_ITEM(new_descriptor, 1)));
+
+  assert_int_equal(
+    0,
+    PyUnicode_CompareWithASCIIString(PyTuple_GET_ITEM(new_descriptor, 0), "Name")
+  );
+
+  assert_int_equal(
+    0,
+    PyUnicode_CompareWithASCIIString(PyTuple_GET_ITEM(new_descriptor, 1), "str")
+  );
+
+  Py_DECREF(new_descriptor);
+}
+
 int main(void) {
   Py_Initialize();
 
@@ -113,6 +141,7 @@ int main(void) {
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_does_not_change_descriptor_refcount, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_does_not_change_name_refcount, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_does_not_change_type_refcount, setup, teardown),
+    cmocka_unit_test_setup_teardown(test_qtab_Column_as_descriptor_creates_descriptor, setup, teardown),
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);

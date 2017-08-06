@@ -11,5 +11,6 @@ typedef struct {
 
 bool qtab_Column_init(qtab_Column *column, PyObject *descriptor);
 void qtab_Column_dealloc(qtab_Column *column);
+PyObject *qtab_Column_as_descriptor(qtab_Column *column);
 
 #endif

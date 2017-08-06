@@ -54,3 +54,31 @@ void qtab_Column_dealloc(qtab_Column *column) {
   free(column->name);
   free(column->type);
 }
+
+PyObject *qtab_Column_as_descriptor(qtab_Column *column) {
+  PyObject *descriptor;
+  PyObject *name;
+  PyObject *type;
+
+  name = PyUnicode_FromString(column->name);
+  if (name == NULL)
+    return NULL;
+
+  type = PyUnicode_FromString(column->type);
+  if (type == NULL) {
+    Py_DECREF(name);
+    return NULL;
+  }
+
+  descriptor = PyTuple_New(2);
+  if (descriptor == NULL) {
+      Py_DECREF(name);
+      Py_DECREF(type);
+      return NULL;
+  }
+
+  PyTuple_SET_ITEM(descriptor, 0, name);
+  PyTuple_SET_ITEM(descriptor, 1, type);
+
+  return descriptor;
+}
