@@ -10,6 +10,22 @@ typedef struct {
   PyObject *descriptor;
 } TestState;
 
+static char *get_exception_string(void) {
+  PyObject *exc_value;
+  PyObject *exc_type;
+  PyObject *exc_traceback;
+  char *exc_string;
+
+  if (PyErr_Occurred() == NULL)
+    return NULL;
+
+  PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
+  exc_string = PyUnicode_AsUTF8(exc_value);
+  PyErr_Restore(exc_type, exc_value, exc_traceback);
+
+  return exc_string;
+}
+
 static int setup(void **state) {
   TestState *test_state = (TestState *)malloc(sizeof(TestState));
 
@@ -103,6 +119,17 @@ static void test_qtab_Column_init_does_not_change_type_refcount(void **state) {
   assert_int_equal(type_ref_count, Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1)));
 }
 
+static void qtab_Column_init_descriptor_not_sequence(void **state) {
+  qtab_Column column;
+  bool result;
+
+  result = qtab_Column_init(&column, Py_None);
+  assert_int_equal(result, false);
+  assert_non_null(PyErr_Occurred());
+
+  assert_string_equal(get_exception_string(), "descriptor not a sequence");
+}
+
 static void test_qtab_Column_as_descriptor_creates_descriptor(void **state) {
   qtab_Column column;
   PyObject *descriptor;
@@ -142,6 +169,7 @@ int main(void) {
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_does_not_change_name_refcount, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_does_not_change_type_refcount, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtab_Column_as_descriptor_creates_descriptor, setup, teardown),
+    cmocka_unit_test_setup_teardown(qtab_Column_init_descriptor_not_sequence, setup, teardown),
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
