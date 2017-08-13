@@ -1,13 +1,13 @@
 #include "blueprint.h"
 
-static const char *qtab_valid_column_types[] = {
+static const char *qtb_valid_column_types[] = {
   "str",
   "int",
   "bool",
   "float",
 };
 
-static bool qtab_validate_column_name(PyObject *descriptor) {
+static bool qtb_validate_column_name(PyObject *descriptor) {
   PyObject *name;
   bool valid = true;
 
@@ -23,11 +23,11 @@ static bool qtab_validate_column_name(PyObject *descriptor) {
   return valid;
 }
 
-static bool qtab_valid_column_types_contains(PyObject *type) {
+static bool qtb_valid_column_types_contains(PyObject *type) {
   bool contained = false;
 
   for (size_t i = 0; i < 4; i++) {
-    if(PyUnicode_CompareWithASCIIString(type, qtab_valid_column_types[i]) == 0) {
+    if(PyUnicode_CompareWithASCIIString(type, qtb_valid_column_types[i]) == 0) {
       contained = true;
       break;
     }
@@ -36,14 +36,14 @@ static bool qtab_valid_column_types_contains(PyObject *type) {
   return contained;
 }
 
-static bool qtab_validate_column_type(PyObject *descriptor) {
+static bool qtb_validate_column_type(PyObject *descriptor) {
   PyObject *type;
   bool valid = true;
 
   if ((type = PySequence_ITEM(descriptor, 1)) == NULL)
     return false;
 
-  if (PyUnicode_Check(type) == 0 || !qtab_valid_column_types_contains(type)) {
+  if (PyUnicode_Check(type) == 0 || !qtb_valid_column_types_contains(type)) {
     PyErr_SetString(PyExc_TypeError, "invalid blueprint");
     valid = false;
   }
@@ -52,7 +52,7 @@ static bool qtab_validate_column_type(PyObject *descriptor) {
   return valid;
 }
 
-static bool qtab_validate_descriptor(PyObject *descriptor) {
+static bool qtb_validate_descriptor(PyObject *descriptor) {
   Py_ssize_t len;
 
   if (PySequence_Check(descriptor) != 1) {
@@ -68,13 +68,13 @@ static bool qtab_validate_descriptor(PyObject *descriptor) {
     return false;
   }
 
-  if (qtab_validate_column_name(descriptor) == false)
+  if (qtb_validate_column_name(descriptor) == false)
     return false;
 
-  return qtab_validate_column_type(descriptor);
+  return qtb_validate_column_type(descriptor);
 }
 
-bool qtab_validate_blueprint(PyObject *blueprint) {
+bool qtb_validate_blueprint(PyObject *blueprint) {
   Py_ssize_t len;
   PyObject *fast_blueprint;
   bool valid_descriptor = true;
@@ -89,7 +89,7 @@ bool qtab_validate_blueprint(PyObject *blueprint) {
     return false;
 
   for (Py_ssize_t i = 0; i < len; i++) {
-    valid_descriptor = qtab_validate_descriptor(PySequence_Fast_GET_ITEM(fast_blueprint, i));
+    valid_descriptor = qtb_validate_descriptor(PySequence_Fast_GET_ITEM(fast_blueprint, i));
     if (valid_descriptor == false)
       break;
   }

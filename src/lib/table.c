@@ -28,7 +28,7 @@ static int qtb_table_init(QtbTable *self, PyObject *args, PyObject *kwargs) {
   if (!PyArg_ParseTuple(args, "O|", &blueprint))
     return -1;
 
-  if (qtab_validate_blueprint(blueprint) == false)
+  if (qtb_validate_blueprint(blueprint) == false)
     return -1;
 
   self->width = PySequence_Size(blueprint);

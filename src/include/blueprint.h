@@ -4,6 +4,6 @@
 #include <stdbool.h>
 #include <Python.h>
 
-bool qtab_validate_blueprint(PyObject *blueprint);
+bool qtb_validate_blueprint(PyObject *blueprint);
 
 #endif
