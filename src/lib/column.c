@@ -1,13 +1,13 @@
 #include "column.h"
 
-qtab_Column *_qtab_Column_new(mallocer m) {
-  return _qtab_Column_new_many(1, m);
+QtbColumn *_qtb_column_new(mallocer m) {
+  return _qtb_column_new_many(1, m);
 }
 
-qtab_Column *_qtab_Column_new_many(size_t n, mallocer m) {
-  qtab_Column *columns;
+QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
+  QtbColumn *columns;
 
-  columns = (qtab_Column *)(*m)(sizeof(qtab_Column) * n);
+  columns = (QtbColumn *)(*m)(sizeof(QtbColumn) * n);
   if (columns == NULL)
     return NULL;
 
@@ -17,7 +17,7 @@ qtab_Column *_qtab_Column_new_many(size_t n, mallocer m) {
   return columns;
 }
 
-static bool qtab_Column_init_name(qtab_Column *column, PyObject *name) {
+static bool qtb_column_init_name(QtbColumn *column, PyObject *name) {
   char *name_s;
 
   name_s = PyUnicode_AsUTF8AndSize(name, NULL);
@@ -33,7 +33,7 @@ static bool qtab_Column_init_name(qtab_Column *column, PyObject *name) {
   return true;
 }
 
-static bool qtab_Column_init_type(qtab_Column *column, PyObject *type) {
+static bool qtb_column_init_type(QtbColumn *column, PyObject *type) {
   char *type_s;
 
   type_s = PyUnicode_AsUTF8AndSize(type, NULL);
@@ -49,7 +49,7 @@ static bool qtab_Column_init_type(qtab_Column *column, PyObject *type) {
   return true;
 }
 
-bool qtab_Column_init(qtab_Column *column, PyObject *descriptor) {
+bool qtb_column_init(QtbColumn *column, PyObject *descriptor) {
   PyObject *fast_descriptor;
   bool success = true;
 
@@ -58,8 +58,8 @@ bool qtab_Column_init(qtab_Column *column, PyObject *descriptor) {
     return false;
 
   if (
-    qtab_Column_init_name(column, PySequence_Fast_GET_ITEM(fast_descriptor, 0)) == false ||
-    qtab_Column_init_type(column, PySequence_Fast_GET_ITEM(fast_descriptor, 1)) == false
+    qtb_column_init_name(column, PySequence_Fast_GET_ITEM(fast_descriptor, 0)) == false ||
+    qtb_column_init_type(column, PySequence_Fast_GET_ITEM(fast_descriptor, 1)) == false
   )
     success = false;
 
@@ -67,7 +67,7 @@ bool qtab_Column_init(qtab_Column *column, PyObject *descriptor) {
   return success;
 }
 
-bool qtab_Column_init_many(qtab_Column *columns, PyObject *blueprint, Py_ssize_t n) {
+bool qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n) {
   PyObject *fast_blueprint = NULL;
   bool success = true;
   Py_ssize_t i;
@@ -76,7 +76,7 @@ bool qtab_Column_init_many(qtab_Column *columns, PyObject *blueprint, Py_ssize_t
     return NULL;
 
   for (i = 0; i < n; i++) {
-    if (qtab_Column_init(&columns[i], PySequence_Fast_GET_ITEM(fast_blueprint, i)) == false) {
+    if (qtb_column_init(&columns[i], PySequence_Fast_GET_ITEM(fast_blueprint, i)) == false) {
       success = false;
       break;
     }
@@ -84,19 +84,19 @@ bool qtab_Column_init_many(qtab_Column *columns, PyObject *blueprint, Py_ssize_t
 
   if (success == false) {
     for (Py_ssize_t j = i - 1; i >= 0; i--)
-      qtab_Column_dealloc(&columns[j]);
+      qtb_column_dealloc(&columns[j]);
   }
 
   Py_DECREF(fast_blueprint);
   return success;
 }
 
-void qtab_Column_dealloc(qtab_Column *column) {
+void qtb_column_dealloc(QtbColumn *column) {
   free(column->name);
   free(column->type);
 }
 
-PyObject *qtab_Column_as_descriptor(qtab_Column *column) {
+PyObject *qtb_column_as_descriptor(QtbColumn *column) {
   PyObject *descriptor = NULL;
   PyObject *name = NULL;
   PyObject *type = NULL;

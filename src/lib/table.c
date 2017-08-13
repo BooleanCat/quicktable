@@ -16,7 +16,7 @@ qtab_Table_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
 
 static void qtab_Table_dealloc(qtab_Table *self) {
   for (Py_ssize_t i = 0; i < self->width; i++)
-    qtab_Column_dealloc(&self->columns[i]);
+    qtb_column_dealloc(&self->columns[i]);
 
   free(self->columns);
   Py_TYPE(self)->tp_free((PyObject *)self);
@@ -35,13 +35,13 @@ static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
   if (self->width == -1)
     return -1;
 
-  self->columns = qtab_Column_new_many((size_t)self->width);
+  self->columns = qtb_column_new_many((size_t)self->width);
   if (self->columns == NULL) {
     PyErr_SetString(PyExc_MemoryError, "failed to initialise table");
     return -1;
   }
 
-  if (qtab_Column_init_many(self->columns, blueprint, self->width) == false) {
+  if (qtb_column_init_many(self->columns, blueprint, self->width) == false) {
     free(self->columns);
     return -1;
   }
@@ -96,7 +96,7 @@ static PyObject *qtab_Table_blueprint(qtab_Table *self, void *closure) {
     return NULL;
 
   for (Py_ssize_t i = 0; i < self->width; i++) {
-    descriptor = qtab_Column_as_descriptor(&self->columns[i]);
+    descriptor = qtb_column_as_descriptor(&self->columns[i]);
     if (descriptor == NULL) {
       Py_DECREF(blueprint);
       return NULL;

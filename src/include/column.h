@@ -11,17 +11,17 @@ typedef struct {
   char *name;
   char *type;
   strduper strdup;
-} qtab_Column;
+} QtbColumn;
 
-qtab_Column *_qtab_Column_new(mallocer m);
-#define qtab_Column_new() _qtab_Column_new(&malloc)
+QtbColumn *_qtb_column_new(mallocer m);
+#define qtb_column_new() _qtb_column_new(&malloc)
 
-qtab_Column *_qtab_Column_new_many(size_t n, mallocer m);
-#define qtab_Column_new_many(n) _qtab_Column_new_many(n, &malloc);
+QtbColumn *_qtb_column_new_many(size_t n, mallocer m);
+#define qtb_column_new_many(n) _qtb_column_new_many(n, &malloc);
 
-bool qtab_Column_init(qtab_Column *column, PyObject *descriptor);
-bool qtab_Column_init_many(qtab_Column *columns, PyObject *blueprint, Py_ssize_t n);
-void qtab_Column_dealloc(qtab_Column *column);
-PyObject *qtab_Column_as_descriptor(qtab_Column *column);
+bool qtb_column_init(QtbColumn *column, PyObject *descriptor);
+bool qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n);
+void qtb_column_dealloc(QtbColumn *column);
+PyObject *qtb_column_as_descriptor(QtbColumn *column);
 
 #endif

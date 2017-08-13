@@ -11,7 +11,7 @@ typedef struct {
     PyObject_HEAD
     Py_ssize_t size;
     Py_ssize_t width;
-    qtab_Column *columns;
+    QtbColumn *columns;
 } qtab_Table;
 
 #endif
