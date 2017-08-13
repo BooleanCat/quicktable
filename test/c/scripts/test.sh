@@ -2,10 +2,14 @@
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROJECT_ROOT="$(dirname "$( dirname "$( dirname "$DIR" )" )" )"
+TEST_DIR="$( dirname "$DIR" )"
 
-docker run \
-  -v "$PROJECT_ROOT:/home/test/quicktable" \
-  -w /home/test/quicktable/test/c \
-  quicktable-test-c \
-  scripts/_test.sh
+export PY_CFLAGS="$( python-config --cflags )"
+export PY_LDFLAGS="$( python-config --ldflags )"
+
+pushd "$TEST_DIR" >/dev/null
+  make clean
+  make qtab_test_column
+  ./qtab_test_column
+  make clean
+popd >/dev/null
