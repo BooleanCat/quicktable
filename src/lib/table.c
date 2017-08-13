@@ -1,10 +1,10 @@
 #include "table.h"
 
 static PyObject *
-qtab_Table_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
-  qtab_Table *self;
+qtb_table_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
+  QtbTable *self;
 
-  self = (qtab_Table *)type->tp_alloc(type, 0);
+  self = (QtbTable *)type->tp_alloc(type, 0);
   if (self != NULL) {
     self->size = 0;
     self->width = 0;
@@ -14,7 +14,7 @@ qtab_Table_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
   return (PyObject *)self;
 }
 
-static void qtab_Table_dealloc(qtab_Table *self) {
+static void qtb_table_dealloc(QtbTable *self) {
   for (Py_ssize_t i = 0; i < self->width; i++)
     qtb_column_dealloc(&self->columns[i]);
 
@@ -22,7 +22,7 @@ static void qtab_Table_dealloc(qtab_Table *self) {
   Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
-static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
+static int qtb_table_init(QtbTable *self, PyObject *args, PyObject *kwargs) {
   PyObject *blueprint = NULL;
 
   if (!PyArg_ParseTuple(args, "O|", &blueprint))
@@ -49,12 +49,12 @@ static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
   return 0;
 }
 
-static Py_ssize_t qtab_Table_length(qtab_Table *self) {
+static Py_ssize_t qtb_table_length(QtbTable *self) {
   return self->size;
 }
 
-static PySequenceMethods qtab_Table_as_sequence = {
-  (lenfunc)qtab_Table_length,  // sq_length
+static PySequenceMethods qtb_table_as_sequence = {
+  (lenfunc)qtb_table_length,  // sq_length
   0,  // sq_concat
   0,  // sq_repeat
   0,  // sq_item
@@ -66,12 +66,12 @@ static PySequenceMethods qtab_Table_as_sequence = {
   0,  // sq_inplace_repeat
 };
 
-static PyObject *qtab_Table_append(qtab_Table *self) {
+static PyObject *qtb_table_append(QtbTable *self) {
   self->size++;
   Py_RETURN_NONE;
 }
 
-static PyObject *qtab_Table_pop(qtab_Table *self) {
+static PyObject *qtb_table_pop(QtbTable *self) {
   if (self->size == 0) {
     PyErr_SetString(PyExc_IndexError, "pop from empty table");
     return NULL;
@@ -81,13 +81,13 @@ static PyObject *qtab_Table_pop(qtab_Table *self) {
   Py_RETURN_NONE;
 }
 
-static PyMethodDef qtab_Table_methods[] = {
-  {"append", (PyCFunction)qtab_Table_append, METH_NOARGS, "append"},
-  {"pop", (PyCFunction)qtab_Table_pop, METH_NOARGS, "pop"},
+static PyMethodDef qtb_table_methods[] = {
+  {"append", (PyCFunction)qtb_table_append, METH_NOARGS, "append"},
+  {"pop", (PyCFunction)qtb_table_pop, METH_NOARGS, "pop"},
   {NULL, NULL}
 };
 
-static PyObject *qtab_Table_blueprint(qtab_Table *self, void *closure) {
+static PyObject *qtb_table_blueprint(QtbTable *self, void *closure) {
   PyObject *blueprint = NULL;
   PyObject *descriptor = NULL;
 
@@ -108,24 +108,24 @@ static PyObject *qtab_Table_blueprint(qtab_Table *self, void *closure) {
   return blueprint;
 }
 
-static PyGetSetDef qtab_table_getsetters[] = {
-  {"blueprint", (getter)qtab_Table_blueprint, NULL, "copy of table's blueprint", NULL},
+static PyGetSetDef qtb_table_getsetters[] = {
+  {"blueprint", (getter)qtb_table_blueprint, NULL, "copy of table's blueprint", NULL},
   {NULL}
 };
 
-PyTypeObject qtab_TableType = {
+PyTypeObject QtbTableType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "quicktable.Table",  // tp_name
-    sizeof(qtab_Table),  // tp_basicsize
+    sizeof(QtbTable),  // tp_basicsize
     0,  // tp_itemsize
-    (destructor)qtab_Table_dealloc,  // tp_dealloc
+    (destructor)qtb_table_dealloc,  // tp_dealloc
     0,  // tp_print
     0,  // tp_getattr
     0,  // tp_setattr
     0,  // tp_reserved
     0,  // tp_repr
     0,  // tp_as_number
-    &qtab_Table_as_sequence,  // tp_as_sequence
+    &qtb_table_as_sequence,  // tp_as_sequence
     0,  // tp_as_mapping
     0,  // tp_hash
     0,  // tp_call
@@ -141,15 +141,15 @@ PyTypeObject qtab_TableType = {
     0,  // tp_weaklistoffset
     0,  // tp_iter
     0,  // tp_iternext
-    qtab_Table_methods,  // tp_methods
+    qtb_table_methods,  // tp_methods
     0,  // tp_members
-    qtab_table_getsetters,  // tp_getset
+    qtb_table_getsetters,  // tp_getset
     0,  // tp_base
     0,  // tp_dict
     0,  // tp_descr_get
     0,  // tp_descr_set
     0,  // tp_dictoffset
-    (initproc)qtab_Table_init,  // tp_init
+    (initproc)qtb_table_init,  // tp_init
     0,  // tp_alloc
-    qtab_Table_new  // tp_new
+    qtb_table_new  // tp_new
 };

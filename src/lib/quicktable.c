@@ -1,7 +1,7 @@
 #include <Python.h>
 #include "table.h"
 
-extern PyTypeObject qtab_TableType;
+extern PyTypeObject QtbTableType;
 
 static PyModuleDef quicktable_module = {
   PyModuleDef_HEAD_INIT,
@@ -18,15 +18,15 @@ static PyModuleDef quicktable_module = {
 PyMODINIT_FUNC PyInit_quicktable() {
   PyObject *module;
 
-  if (PyType_Ready(&qtab_TableType) < 0)
+  if (PyType_Ready(&QtbTableType) < 0)
     return NULL;
 
   module = PyModule_Create(&quicktable_module);
   if (module == NULL)
     return NULL;
 
-  Py_INCREF(&qtab_TableType);
-  if (PyModule_AddObject(module, "Table", (PyObject *)&qtab_TableType) == -1)
+  Py_INCREF(&QtbTableType);
+  if (PyModule_AddObject(module, "Table", (PyObject *)&QtbTableType) == -1)
     return NULL;
 
   return module;
