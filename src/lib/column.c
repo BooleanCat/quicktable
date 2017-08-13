@@ -1,9 +1,5 @@
 #include "column.h"
 
-QtbColumn *_qtb_column_new(mallocer m) {
-  return _qtb_column_new_many(1, m);
-}
-
 QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
   QtbColumn *columns;
 
