@@ -14,6 +14,10 @@ static void *failing_malloc(size_t size) {
   return NULL;
 }
 
+static char *failing_strdup(const char *s) {
+  return NULL;
+}
+
 static char *get_exception_string(void) {
   PyObject *exc_value;
   PyObject *exc_type;
@@ -184,7 +188,7 @@ static void test_qtb_column_init_does_not_change_type_refcount(void **state) {
   assert_int_equal(type_ref_count, Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1)));
 }
 
-static void qtb_column_init_descriptor_not_sequence(void **state) {
+static void test_qtb_column_init_descriptor_not_sequence(void **state) {
   QtbColumn *column;
   bool result;
 
@@ -232,11 +236,31 @@ static void test_qtb_column_as_descriptor_creates_descriptor(void **state) {
   Py_DECREF(new_descriptor);
 }
 
+void test_qtb_column_init_strdup_fails(void **state) {
+  QtbColumn *column;
+  PyObject *descriptor;
+  bool success;
+
+  column = qtb_column_new();
+  assert_non_null(column);
+  column->strdup = &failing_strdup;
+
+  descriptor = ((TestState *)(*state))->descriptor;
+
+  success = qtb_column_init(column, descriptor);
+  qtb_column_dealloc(column);
+  free(column);
+
+  assert_int_equal(success, false);
+  assert_string_equal(get_exception_string(), "failed to initialise column");
+}
+
 const struct CMUnitTest column_tests[] = {
   cmocka_unit_test(test_qtb_column_new),
   cmocka_unit_test(test_qtb_column_new_fails),
   cmocka_unit_test(test_qtb_column_new_many),
   cmocka_unit_test(test_qtb_column_new_many_fails),
+
   cmocka_unit_test_setup_teardown(test_qtb_column_init_returns_true, setup, teardown),
   cmocka_unit_test_setup_teardown(test_qtb_column_init_sets_column_name, setup, teardown),
   cmocka_unit_test_setup_teardown(test_qtb_column_init_sets_column_type, setup, teardown),
@@ -244,5 +268,6 @@ const struct CMUnitTest column_tests[] = {
   cmocka_unit_test_setup_teardown(test_qtb_column_init_does_not_change_name_refcount, setup, teardown),
   cmocka_unit_test_setup_teardown(test_qtb_column_init_does_not_change_type_refcount, setup, teardown),
   cmocka_unit_test_setup_teardown(test_qtb_column_as_descriptor_creates_descriptor, setup, teardown),
-  cmocka_unit_test_setup_teardown(qtb_column_init_descriptor_not_sequence, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_init_descriptor_not_sequence, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_init_strdup_fails, setup, teardown),
 };
