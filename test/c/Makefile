@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = ${PY_CFLAGS} -lcmocka
+CFLAGS = ${PY_CFLAGS}
 LDFLAGS = ${PY_LDFLAGS}
 
 qtab_column.o: ../../src/lib/column.c
