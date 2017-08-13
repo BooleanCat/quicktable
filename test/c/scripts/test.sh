@@ -9,7 +9,7 @@ export PY_LDFLAGS="$( python-config --ldflags )"
 
 pushd "$TEST_DIR" >/dev/null
   make clean
-  make qtab_test_column
-  ./qtab_test_column
+  make qtb_test_column
+  ./qtb_test_column
   make clean
 popd >/dev/null
