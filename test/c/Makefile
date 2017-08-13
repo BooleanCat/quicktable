@@ -8,7 +8,10 @@ qtb_column.o: ../../src/lib/column.c
 qtb_test_column.o: test_column.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
-qtb_test_column: qtb_column.o qtb_test_column.o
+qtb_tests.o: tests.c
+	$(CC) -o $@ -c $(CFLAGS) $^
+
+qtb_tests: qtb_tests.o qtb_column.o qtb_test_column.o
 	$(CC) $^ -o $@ $(PY_LDFLAGS) -lcmocka
 
 clean:

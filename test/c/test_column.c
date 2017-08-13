@@ -232,23 +232,17 @@ static void test_qtb_column_as_descriptor_creates_descriptor(void **state) {
   Py_DECREF(new_descriptor);
 }
 
-int main(void) {
-  Py_Initialize();
-
-  const struct CMUnitTest tests[] = {
-    cmocka_unit_test(test_qtb_column_new),
-    cmocka_unit_test(test_qtb_column_new_fails),
-    cmocka_unit_test(test_qtb_column_new_many),
-    cmocka_unit_test(test_qtb_column_new_many_fails),
-    cmocka_unit_test_setup_teardown(test_qtb_column_init_returns_true, setup, teardown),
-    cmocka_unit_test_setup_teardown(test_qtb_column_init_sets_column_name, setup, teardown),
-    cmocka_unit_test_setup_teardown(test_qtb_column_init_sets_column_type, setup, teardown),
-    cmocka_unit_test_setup_teardown(test_qtb_column_init_does_not_change_descriptor_refcount, setup, teardown),
-    cmocka_unit_test_setup_teardown(test_qtb_column_init_does_not_change_name_refcount, setup, teardown),
-    cmocka_unit_test_setup_teardown(test_qtb_column_init_does_not_change_type_refcount, setup, teardown),
-    cmocka_unit_test_setup_teardown(test_qtb_column_as_descriptor_creates_descriptor, setup, teardown),
-    cmocka_unit_test_setup_teardown(qtb_column_init_descriptor_not_sequence, setup, teardown),
-  };
-
-  return cmocka_run_group_tests(tests, NULL, NULL);
-}
+const struct CMUnitTest column_tests[] = {
+  cmocka_unit_test(test_qtb_column_new),
+  cmocka_unit_test(test_qtb_column_new_fails),
+  cmocka_unit_test(test_qtb_column_new_many),
+  cmocka_unit_test(test_qtb_column_new_many_fails),
+  cmocka_unit_test_setup_teardown(test_qtb_column_init_returns_true, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_init_sets_column_name, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_init_sets_column_type, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_init_does_not_change_descriptor_refcount, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_init_does_not_change_name_refcount, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_init_does_not_change_type_refcount, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_as_descriptor_creates_descriptor, setup, teardown),
+  cmocka_unit_test_setup_teardown(qtb_column_init_descriptor_not_sequence, setup, teardown),
+};
