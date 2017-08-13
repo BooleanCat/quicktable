@@ -35,7 +35,7 @@ static int qtab_Table_init(qtab_Table *self, PyObject *args, PyObject *kwargs) {
   if (self->width == -1)
     return -1;
 
-  self->columns = (qtab_Column *)malloc(sizeof(qtab_Column) * self->width);
+  self->columns = qtab_Column_new_many((size_t)self->width);
   if (self->columns == NULL) {
     PyErr_SetString(PyExc_MemoryError, "failed to initialise table");
     return -1;

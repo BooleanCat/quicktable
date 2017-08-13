@@ -1,5 +1,22 @@
 #include "column.h"
 
+qtab_Column *_qtab_Column_new(mallocer m) {
+  return _qtab_Column_new_many(1, m);
+}
+
+qtab_Column *_qtab_Column_new_many(size_t n, mallocer m) {
+  qtab_Column *columns;
+
+  columns = (qtab_Column *)(*m)(sizeof(qtab_Column) * n);
+  if (columns == NULL)
+    return NULL;
+
+  for (size_t i = 0; i < n; i++)
+    columns[i].strdup = &strdup;
+
+  return columns;
+}
+
 static bool qtab_Column_init_name(qtab_Column *column, PyObject *name) {
   char *name_s;
 
@@ -7,7 +24,7 @@ static bool qtab_Column_init_name(qtab_Column *column, PyObject *name) {
   if (name == NULL)
     return false;
 
-  column->name = strdup(name_s);
+  column->name = (*column->strdup)(name_s);
   if (column->name == NULL) {
     PyErr_SetString(PyExc_MemoryError, "failed to initialise column");
     return false;
@@ -23,7 +40,7 @@ static bool qtab_Column_init_type(qtab_Column *column, PyObject *type) {
   if (type == NULL)
     return false;
 
-  column->type = strdup(type_s);
+  column->type = (*column->strdup)(type_s);
   if (column->type == NULL) {
     PyErr_SetString(PyExc_MemoryError, "failed to initialise column");
     return false;

@@ -10,6 +10,10 @@ typedef struct {
   PyObject *descriptor;
 } TestState;
 
+static void *failing_malloc(size_t size) {
+  return NULL;
+}
+
 static char *get_exception_string(void) {
   PyObject *exc_value;
   PyObject *exc_type;
@@ -49,97 +53,167 @@ static int teardown(void **state) {
   return 0;
 }
 
+static void test_qtab_Column_new(void **state) {
+  qtab_Column *column;
+
+  column = qtab_Column_new();
+  assert_non_null(column);
+  assert_ptr_equal(column->strdup, &strdup);
+
+  free(column);
+}
+
+static void test_qtab_Column_new_fails(void **state) {
+  qtab_Column *column;
+
+  column = _qtab_Column_new(&failing_malloc);
+  assert_null(column);
+}
+
+static void test_qtab_Column_new_many(void **state) {
+  qtab_Column *columns;
+
+  columns = qtab_Column_new_many(20);
+  assert_non_null(columns);
+
+  for (size_t i = 0; i < 20; i++) {
+    assert_ptr_equal(columns[i].strdup, &strdup);
+  }
+
+  free(columns);
+}
+
+static void test_qtab_Column_new_many_fails(void **state) {
+  qtab_Column *columns;
+
+  columns = _qtab_Column_new_many(20, &failing_malloc);
+  assert_null(columns);
+}
+
 static void test_qtab_Column_init_returns_true(void **state) {
-  qtab_Column column;
+  qtab_Column *column;
   bool success;
 
-  success = qtab_Column_init(&column, ((TestState *)(*state))->descriptor);
+  column = qtab_Column_new();
+  assert_non_null(column);
+
+  success = qtab_Column_init(column, ((TestState *)(*state))->descriptor);
   assert_int_equal(success, true);
 
-  qtab_Column_dealloc(&column);
+  qtab_Column_dealloc(column);
+  free(column);
 }
 
 static void test_qtab_Column_init_sets_column_name(void **state) {
-  qtab_Column column;
+  qtab_Column *column;
 
-  qtab_Column_init(&column, ((TestState *)(*state))->descriptor);
-  assert_string_equal("Name", column.name);
+  column = qtab_Column_new();
+  assert_non_null(column);
 
-  qtab_Column_dealloc(&column);
+  qtab_Column_init(column, ((TestState *)(*state))->descriptor);
+  assert_string_equal("Name", column->name);
+
+  qtab_Column_dealloc(column);
+  free(column);
 }
 
 static void test_qtab_Column_init_sets_column_type(void **state) {
-  qtab_Column column;
+  qtab_Column *column;
 
-  qtab_Column_init(&column, ((TestState *)(*state))->descriptor);
-  assert_string_equal("str", column.type);
+  column = qtab_Column_new();
+  assert_non_null(column);
 
-  qtab_Column_dealloc(&column);
+  qtab_Column_init(column, ((TestState *)(*state))->descriptor);
+  assert_string_equal("str", column->type);
+
+  qtab_Column_dealloc(column);
+  free(column);
 }
 
 static void test_qtab_Column_init_does_not_change_descriptor_refcount(void **state) {
-  qtab_Column column;
+  qtab_Column *column;
   PyObject *descriptor;
   Py_ssize_t descriptor_ref_count;
+
+  column = qtab_Column_new();
+  assert_non_null(column);
 
   descriptor = ((TestState *)(*state))->descriptor;
   descriptor_ref_count = Py_REFCNT(descriptor);
 
-  qtab_Column_init(&column, descriptor);
-  qtab_Column_dealloc(&column);
+  qtab_Column_init(column, descriptor);
+  qtab_Column_dealloc(column);
+  free(column);
 
   assert_int_equal(descriptor_ref_count, Py_REFCNT(descriptor));
 }
 
 static void test_qtab_Column_init_does_not_change_name_refcount(void **state) {
-  qtab_Column column;
+  qtab_Column *column;
   PyObject *descriptor;
   Py_ssize_t name_ref_count;
+
+  column = qtab_Column_new();
+  assert_non_null(column);
 
   descriptor = ((TestState *)(*state))->descriptor;
   name_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 0));
 
-  qtab_Column_init(&column, descriptor);
-  qtab_Column_dealloc(&column);
+  qtab_Column_init(column, descriptor);
+  qtab_Column_dealloc(column);
+  free(column);
 
   assert_int_equal(name_ref_count, Py_REFCNT(PyTuple_GET_ITEM(descriptor, 0)));
 }
 
 static void test_qtab_Column_init_does_not_change_type_refcount(void **state) {
-  qtab_Column column;
+  qtab_Column *column;
   PyObject *descriptor;
   Py_ssize_t type_ref_count;
+
+  column = qtab_Column_new();
+  assert_non_null(column);
 
   descriptor = ((TestState *)(*state))->descriptor;
   type_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1));
 
-  qtab_Column_init(&column, descriptor);
-  qtab_Column_dealloc(&column);
+  qtab_Column_init(column, descriptor);
+  qtab_Column_dealloc(column);
+  free(column);
 
   assert_int_equal(type_ref_count, Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1)));
 }
 
 static void qtab_Column_init_descriptor_not_sequence(void **state) {
-  qtab_Column column;
+  qtab_Column *column;
   bool result;
 
-  result = qtab_Column_init(&column, Py_None);
+  column = qtab_Column_new();
+  assert_non_null(column);
+
+  result = qtab_Column_init(column, Py_None);
   assert_int_equal(result, false);
   assert_non_null(PyErr_Occurred());
 
   assert_string_equal(get_exception_string(), "descriptor not a sequence");
+
+  free(column);
 }
 
 static void test_qtab_Column_as_descriptor_creates_descriptor(void **state) {
-  qtab_Column column;
+  qtab_Column *column;
   PyObject *descriptor;
   PyObject *new_descriptor;
 
+  column = qtab_Column_new();
+  assert_non_null(column);
+
   descriptor = ((TestState *)(*state))->descriptor;
 
-  qtab_Column_init(&column, descriptor);
-  new_descriptor = qtab_Column_as_descriptor(&column);
-  qtab_Column_dealloc(&column);
+  qtab_Column_init(column, descriptor);
+  new_descriptor = qtab_Column_as_descriptor(column);
+  qtab_Column_dealloc(column);
+  free(column);
 
   assert_int_equal(PyTuple_Size(new_descriptor), 2);
   assert_int_equal(1, PyUnicode_Check(PyTuple_GET_ITEM(new_descriptor, 0)));
@@ -162,6 +236,10 @@ int main(void) {
   Py_Initialize();
 
   const struct CMUnitTest tests[] = {
+    cmocka_unit_test(test_qtab_Column_new),
+    cmocka_unit_test(test_qtab_Column_new_fails),
+    cmocka_unit_test(test_qtab_Column_new_many),
+    cmocka_unit_test(test_qtab_Column_new_many_fails),
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_returns_true, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_sets_column_name, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtab_Column_init_sets_column_type, setup, teardown),
