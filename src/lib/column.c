@@ -19,7 +19,7 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
 static bool qtb_column_init_name(QtbColumn *column, PyObject *name) {
   char *name_s;
 
-  name_s = PyUnicode_AsUTF8AndSize(name, NULL);
+  name_s = PyUnicode_AsUTF8(name);
   if (name == NULL)
     return false;
 
@@ -35,7 +35,7 @@ static bool qtb_column_init_name(QtbColumn *column, PyObject *name) {
 static bool qtb_column_init_type(QtbColumn *column, PyObject *type) {
   char *type_s;
 
-  type_s = PyUnicode_AsUTF8AndSize(type, NULL);
+  type_s = PyUnicode_AsUTF8(type);
   if (type == NULL)
     return false;
 

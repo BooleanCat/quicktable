@@ -5,7 +5,7 @@
 #include <string.h>
 #include <Python.h>
 
-typedef void *(*mallocer)(size_t size);
+typedef void *(*mallocer)(size_t);
 typedef char *(*strduper)(const char *);
 
 typedef struct {
