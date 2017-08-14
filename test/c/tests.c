@@ -4,7 +4,7 @@
 #include <cmocka.h>
 #include <Python.h>
 
-#define N_COLUMN_TESTS 13
+#define N_COLUMN_TESTS 7
 #define N_BLUEPRINT_TESTS 1
 
 extern const struct CMUnitTest column_tests[N_COLUMN_TESTS];
