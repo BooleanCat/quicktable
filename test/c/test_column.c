@@ -33,6 +33,15 @@ static PyObject *new_descriptor(const char *name, const char* type) {
   return descriptor;
 }
 
+static QtbColumn *checked_qtb_column_new() {
+  QtbColumn *column;
+
+  column = qtb_column_new();
+  assert_non_null(column);
+
+  return column;
+}
+
 static char *get_exception_string(void) {
   PyObject *exc_value;
   PyObject *exc_type;
@@ -90,8 +99,7 @@ static void test_qtb_column_init_does_not_change_descriptor_refcount(void **stat
   PyObject *descriptor;
   Py_ssize_t descriptor_ref_count;
 
-  column = qtb_column_new();
-  assert_non_null(column);
+  column = checked_qtb_column_new();
 
   descriptor = ((TestState *)(*state))->descriptor;
   descriptor_ref_count = Py_REFCNT(descriptor);
@@ -108,8 +116,7 @@ static void test_qtb_column_init_does_not_change_name_refcount(void **state) {
   PyObject *descriptor;
   Py_ssize_t name_ref_count;
 
-  column = qtb_column_new();
-  assert_non_null(column);
+  column = checked_qtb_column_new();
 
   descriptor = ((TestState *)(*state))->descriptor;
   name_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 0));
@@ -126,8 +133,7 @@ static void test_qtb_column_init_does_not_change_type_refcount(void **state) {
   PyObject *descriptor;
   Py_ssize_t type_ref_count;
 
-  column = qtb_column_new();
-  assert_non_null(column);
+  column = checked_qtb_column_new();
 
   descriptor = ((TestState *)(*state))->descriptor;
   type_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1));
@@ -143,13 +149,11 @@ static void test_qtb_column_init_descriptor_not_sequence(void **state) {
   QtbColumn *column;
   bool result;
 
-  column = qtb_column_new();
-  assert_non_null(column);
+  column = checked_qtb_column_new();
 
   result = qtb_column_init(column, Py_None);
   assert_int_equal(result, false);
   assert_non_null(PyErr_Occurred());
-
   assert_string_equal(get_exception_string(), "descriptor not a sequence");
 
   free(column);
@@ -160,8 +164,7 @@ static void test_qtb_column_init_strdup_fails(void **state) {
   PyObject *descriptor;
   bool success;
 
-  column = qtb_column_new();
-  assert_non_null(column);
+  column = checked_qtb_column_new();
   column->strdup = &failing_strdup;
 
   descriptor = ((TestState *)(*state))->descriptor;
@@ -180,14 +183,13 @@ static void test_qtb_column_init_free_on_fail(void **state) {
   bool success;
 
   descriptor = new_descriptor("Name", "invalid");
-
-  column = qtb_column_new();
-  assert_non_null(column);
+  column = checked_qtb_column_new();
 
   success = qtb_column_init(column, descriptor);
   assert_int_equal(success, false);
 
   assert_null(column->name);
+  assert_non_null(PyErr_Occurred());
   assert_string_equal(get_exception_string(), "invalid column type");
 
   Py_DECREF(descriptor);
