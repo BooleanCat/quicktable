@@ -1,5 +1,35 @@
 #include "column.h"
 
+static QtbColumnType qtb_column_type_from_pystring(PyObject *type) {
+  if (PyUnicode_CompareWithASCIIString(type, "str") == 0) {
+    return QTB_COLUMN_TYPE_STR;
+  } else if (PyUnicode_CompareWithASCIIString(type, "int") == 0) {
+    return QTB_COLUMN_TYPE_INT;
+  } else if (PyUnicode_CompareWithASCIIString(type, "float") == 0) {
+    return QTB_COLUMN_TYPE_FLOAT;
+  } else if (PyUnicode_CompareWithASCIIString(type, "bool") == 0) {
+    return QTB_COLUMN_TYPE_BOOL;
+  }
+
+  PyErr_SetString(PyExc_RuntimeError, "invalid column type");
+  return QTB_COLUMN_TYPE_ERR;
+}
+
+static PyObject *qtb_column_type_as_pystring(QtbColumnType type) {
+  switch (type) {
+    case QTB_COLUMN_TYPE_STR:
+      return PyUnicode_FromString("str");
+    case QTB_COLUMN_TYPE_INT:
+      return PyUnicode_FromString("int");
+    case QTB_COLUMN_TYPE_FLOAT:
+      return PyUnicode_FromString("float");
+    case QTB_COLUMN_TYPE_BOOL:
+      return PyUnicode_FromString("bool");
+    default:
+      return NULL;
+  }
+}
+
 QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
   QtbColumn *columns;
 
@@ -10,7 +40,6 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
   for (size_t i = 0; i < n; i++) {
     columns[i].strdup = &strdup;
     columns[i].name = NULL;
-    columns[i].type = NULL;
   }
 
   return columns;
@@ -32,22 +61,6 @@ static bool qtb_column_init_name(QtbColumn *column, PyObject *name) {
   return true;
 }
 
-static bool qtb_column_init_type(QtbColumn *column, PyObject *type) {
-  char *type_s;
-
-  type_s = PyUnicode_AsUTF8(type);
-  if (type == NULL)
-    return false;
-
-  column->type = (*column->strdup)(type_s);
-  if (column->type == NULL) {
-    PyErr_SetString(PyExc_MemoryError, "failed to initialise column");
-    return false;
-  }
-
-  return true;
-}
-
 bool qtb_column_init(QtbColumn *column, PyObject *descriptor) {
   PyObject *fast_descriptor;
   bool success = true;
@@ -58,9 +71,11 @@ bool qtb_column_init(QtbColumn *column, PyObject *descriptor) {
 
   if (
     qtb_column_init_name(column, PySequence_Fast_GET_ITEM(fast_descriptor, 0)) == false ||
-    qtb_column_init_type(column, PySequence_Fast_GET_ITEM(fast_descriptor, 1)) == false
-  )
+    (column->type = qtb_column_type_from_pystring(PySequence_Fast_GET_ITEM(fast_descriptor, 1))) == QTB_COLUMN_TYPE_ERR
+  ) {
+    qtb_column_dealloc(column);
     success = false;
+  }
 
   Py_DECREF(fast_descriptor);
   return success;
@@ -92,7 +107,7 @@ bool qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n)
 
 void qtb_column_dealloc(QtbColumn *column) {
   free(column->name);
-  free(column->type);
+  column->name = NULL;
 }
 
 PyObject *qtb_column_as_descriptor(QtbColumn *column) {
@@ -102,7 +117,7 @@ PyObject *qtb_column_as_descriptor(QtbColumn *column) {
 
   if (
     ((name = PyUnicode_FromString(column->name)) == NULL) ||
-    ((type = PyUnicode_FromString(column->type)) == NULL) ||
+    ((type = qtb_column_type_as_pystring(column->type)) == NULL) ||
     ((descriptor = PyTuple_New(2)) == NULL)
   ) {
     Py_XDECREF(name);

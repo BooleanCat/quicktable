@@ -4,4 +4,4 @@ set -e
 test/c/scripts/test.sh
 
 scripts/install.sh >/dev/null
-py.test
+py.test -v

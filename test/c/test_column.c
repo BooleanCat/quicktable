@@ -18,6 +18,21 @@ static char *failing_strdup(const char *s) {
   return NULL;
 }
 
+static PyObject *new_descriptor(const char *name, const char* type) {
+  PyObject *descriptor;
+
+  descriptor = PyTuple_New(2);
+  assert_non_null(descriptor);
+
+  PyTuple_SET_ITEM(descriptor, 0, PyUnicode_FromString(name));
+  assert_non_null(PyTuple_GET_ITEM(descriptor, 0));
+
+  PyTuple_SET_ITEM(descriptor, 1, PyUnicode_FromString(type));
+  assert_non_null(PyTuple_GET_ITEM(descriptor, 1));
+
+  return descriptor;
+}
+
 static char *get_exception_string(void) {
   PyObject *exc_value;
   PyObject *exc_type;
@@ -39,9 +54,7 @@ static int setup(void **state) {
 
   test_state->gstate = PyGILState_Ensure();
   test_state->descriptor = PyTuple_New(2);
-  assert_non_null(test_state);
-  PyTuple_SET_ITEM(test_state->descriptor, 0, PyUnicode_FromString("Name"));
-  PyTuple_SET_ITEM(test_state->descriptor, 1, PyUnicode_FromString("str"));
+  test_state->descriptor = new_descriptor("Name", "str");
 
   *state = (void *)test_state;
   return 0;
@@ -51,6 +64,7 @@ static int teardown(void **state) {
   TestState *test_state = (TestState *)(*state);
 
   Py_DECREF(test_state->descriptor);
+  PyErr_Clear();
   PyGILState_Release(test_state->gstate);
   free(test_state);
 
@@ -141,7 +155,7 @@ static void test_qtb_column_init_descriptor_not_sequence(void **state) {
   free(column);
 }
 
-void test_qtb_column_init_strdup_fails(void **state) {
+static void test_qtb_column_init_strdup_fails(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
   bool success;
@@ -160,6 +174,25 @@ void test_qtb_column_init_strdup_fails(void **state) {
   assert_string_equal(get_exception_string(), "failed to initialise column");
 }
 
+static void test_qtb_column_init_free_on_fail(void **state) {
+  QtbColumn *column;
+  PyObject *descriptor;
+  bool success;
+
+  descriptor = new_descriptor("Name", "invalid");
+
+  column = qtb_column_new();
+  assert_non_null(column);
+
+  success = qtb_column_init(column, descriptor);
+  assert_int_equal(success, false);
+
+  assert_null(column->name);
+  assert_string_equal(get_exception_string(), "invalid column type");
+
+  Py_DECREF(descriptor);
+}
+
 const struct CMUnitTest column_tests[] = {
   cmocka_unit_test(test_qtb_column_new_fails),
   cmocka_unit_test(test_qtb_column_new_many_fails),
@@ -169,4 +202,5 @@ const struct CMUnitTest column_tests[] = {
   cmocka_unit_test_setup_teardown(test_qtb_column_init_does_not_change_type_refcount, setup, teardown),
   cmocka_unit_test_setup_teardown(test_qtb_column_init_descriptor_not_sequence, setup, teardown),
   cmocka_unit_test_setup_teardown(test_qtb_column_init_strdup_fails, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_init_free_on_fail, setup, teardown),
 };

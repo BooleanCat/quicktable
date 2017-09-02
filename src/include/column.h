@@ -8,9 +8,17 @@
 typedef void *(*mallocer)(size_t);
 typedef char *(*strduper)(const char *);
 
+typedef enum {
+  QTB_COLUMN_TYPE_ERR,
+  QTB_COLUMN_TYPE_STR,
+  QTB_COLUMN_TYPE_INT,
+  QTB_COLUMN_TYPE_FLOAT,
+  QTB_COLUMN_TYPE_BOOL,
+} QtbColumnType;
+
 typedef struct {
   char *name;
-  char *type;
+  QtbColumnType type;
   strduper strdup;
 } QtbColumn;
 
