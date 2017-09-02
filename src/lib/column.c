@@ -91,11 +91,8 @@ bool qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n)
 }
 
 void qtb_column_dealloc(QtbColumn *column) {
-  if (column->name != NULL)
-    free(column->name);
-
-  if (column->type != NULL)
-    free(column->type);
+  free(column->name);
+  free(column->type);
 }
 
 PyObject *qtb_column_as_descriptor(QtbColumn *column) {
