@@ -67,6 +67,18 @@ static PySequenceMethods qtb_table_as_sequence = {
 };
 
 static PyObject *qtb_table_append(QtbTable *self, PyObject *row) {
+  if (PySequence_Check(row) != 1) {
+    PyErr_SetString(PyExc_TypeError, "append with non-sequence");
+    return NULL;
+  }
+
+  if (PySequence_Size(row) != self->width) {
+    if (PyErr_Occurred() == NULL)
+      PyErr_SetString(PyExc_TypeError, "append with mismatching row length");
+
+    return NULL;
+  }
+
   self->size++;
   Py_RETURN_NONE;
 }
