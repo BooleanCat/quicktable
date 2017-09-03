@@ -5,6 +5,8 @@
 #include <string.h>
 #include <Python.h>
 
+#define QTB_COLUMN_INITIAL_CAPACITY 20
+
 typedef void *(*mallocer)(size_t);
 typedef char *(*strduper)(const char *);
 
@@ -16,9 +18,19 @@ typedef enum {
   QTB_COLUMN_TYPE_BOOL,
 } QtbColumnType;
 
+typedef union {
+  char *s;
+  long long i;
+  double f;
+  bool b;
+} QtbColumnData;
+
 typedef struct {
   char *name;
   QtbColumnType type;
+  QtbColumnData *data;
+  size_t size;
+  size_t capacity;
   strduper strdup;
 } QtbColumn;
 
@@ -31,5 +43,7 @@ bool qtb_column_init(QtbColumn *column, PyObject *descriptor);
 bool qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n);
 void qtb_column_dealloc(QtbColumn *column);
 PyObject *qtb_column_as_descriptor(QtbColumn *column);
+bool qtb_column_append(QtbColumn *column, PyObject *item);
+PyObject *qtb_column_get_as_pyobject(QtbColumn *column, size_t i);
 
 #endif

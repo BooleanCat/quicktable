@@ -25,7 +25,7 @@ static void qtb_table_dealloc(QtbTable *self) {
 static int qtb_table_init(QtbTable *self, PyObject *args, PyObject *kwargs) {
   PyObject *blueprint = NULL;
 
-  if (!PyArg_ParseTuple(args, "O|", &blueprint))
+  if (!PyArg_ParseTuple(args, "O", &blueprint))
     return -1;
 
   if (qtb_validate_blueprint(blueprint) == false)
@@ -53,11 +53,27 @@ static Py_ssize_t qtb_table_length(QtbTable *self) {
   return self->size;
 }
 
+static PyObject *qtb_table_item(QtbTable *self, Py_ssize_t i) {
+  PyObject *row;
+
+  if (i >= self->size) {
+    PyErr_SetString(PyExc_IndexError, "table index out of range");
+    return NULL;
+  }
+
+  row = PyList_New(self->width);
+  for (Py_ssize_t j = 0; j < self->width; j++) {
+    PyList_SET_ITEM(row, j, qtb_column_get_as_pyobject(&self->columns[j], i));
+  }
+
+  return row;
+}
+
 static PySequenceMethods qtb_table_as_sequence = {
   (lenfunc)qtb_table_length,  // sq_length
   0,  // sq_concat
   0,  // sq_repeat
-  0,  // sq_item
+  (ssizeargfunc)qtb_table_item,  // sq_item
   0,  // sq_slice
   0,  // sq_ass_item
   0,  // sq_ass_slice
@@ -67,6 +83,9 @@ static PySequenceMethods qtb_table_as_sequence = {
 };
 
 static PyObject *qtb_table_append(QtbTable *self, PyObject *row) {
+  PyObject *fast_row;
+  bool success = true;
+
   if (PySequence_Check(row) != 1) {
     PyErr_SetString(PyExc_TypeError, "append with non-sequence");
     return NULL;
@@ -78,6 +97,21 @@ static PyObject *qtb_table_append(QtbTable *self, PyObject *row) {
 
     return NULL;
   }
+
+  fast_row = PySequence_Fast(row, "");
+  if (row == NULL)
+    return NULL;
+
+  for (Py_ssize_t i = 0; i < self->width; i++) {
+    success = qtb_column_append(&self->columns[i], PySequence_Fast_GET_ITEM(fast_row, i));
+    if (success == false)
+      break;
+  }
+
+  Py_DECREF(fast_row);
+
+  if (success == false)
+    return NULL;
 
   self->size++;
   Py_RETURN_NONE;

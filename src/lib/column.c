@@ -40,6 +40,7 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
   for (size_t i = 0; i < n; i++) {
     columns[i].strdup = &strdup;
     columns[i].name = NULL;
+    columns[i].data = NULL;
   }
 
   return columns;
@@ -70,12 +71,16 @@ bool qtb_column_init(QtbColumn *column, PyObject *descriptor) {
     return false;
 
   if (
-    qtb_column_init_name(column, PySequence_Fast_GET_ITEM(fast_descriptor, 0)) == false ||
-    (column->type = qtb_column_type_from_pystring(PySequence_Fast_GET_ITEM(fast_descriptor, 1))) == QTB_COLUMN_TYPE_ERR
+    qtb_column_init_name(column, PySequence_Fast_GET_ITEM(fast_descriptor, 0)) == false
+    || (column->type = qtb_column_type_from_pystring(PySequence_Fast_GET_ITEM(fast_descriptor, 1))) == QTB_COLUMN_TYPE_ERR
+    || (column->data = (QtbColumnData *)malloc(sizeof(QtbColumnData) * QTB_COLUMN_INITIAL_CAPACITY)) == NULL
   ) {
     qtb_column_dealloc(column);
     success = false;
   }
+
+  column->size = 0;
+  column->capacity = QTB_COLUMN_INITIAL_CAPACITY;
 
   Py_DECREF(fast_descriptor);
   return success;
@@ -108,6 +113,9 @@ bool qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n)
 void qtb_column_dealloc(QtbColumn *column) {
   free(column->name);
   column->name = NULL;
+
+  free(column->data);
+  column->data = NULL;
 }
 
 PyObject *qtb_column_as_descriptor(QtbColumn *column) {
@@ -129,4 +137,99 @@ PyObject *qtb_column_as_descriptor(QtbColumn *column) {
   PyTuple_SET_ITEM(descriptor, 1, type);
 
   return descriptor;
+}
+
+static bool qtb_column_append_str(QtbColumn *column, PyObject *item) {
+  char *s;
+
+  if (PyUnicode_Check(item) == 0) {
+    PyErr_SetString(PyExc_TypeError, "non-str entry for str column");
+    return false;
+  }
+
+  if ((s = PyUnicode_AsUTF8(item)) == NULL)
+    return false;
+
+  column->data[column->size].s = (*column->strdup)(s);
+  if (column->data[column->size].s == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "could not create PyUnicodeobject");
+    return false;
+  }
+
+  return true;
+}
+
+static bool qtb_column_append_int(QtbColumn *column, PyObject *item) {
+  if (PyLong_Check(item) == 0) {
+    PyErr_SetString(PyExc_TypeError, "non-int entry for int column");
+    return false;
+  }
+
+  column->data[column->size].i = PyLong_AsLongLong(item);
+  return true;
+}
+
+static bool qtb_column_append_float(QtbColumn *column, PyObject *item) {
+  if(PyFloat_Check(item) == 0) {
+    PyErr_SetString(PyExc_TypeError, "non-float entry for float column");
+    return false;
+  }
+
+  column->data[column->size].f = PyFloat_AsDouble(item);
+  return true;
+}
+
+static bool qtb_column_append_bool(QtbColumn *column, PyObject *item) {
+  if (PyBool_Check(item) == 0) {
+    PyErr_SetString(PyExc_TypeError, "non-bool entry for bool column");
+    return false;
+  }
+
+  column->data[column->size].b = (bool)PyLong_AsLong(item);
+  return true;
+}
+
+bool qtb_column_append(QtbColumn *column, PyObject *item) {
+  bool success = true;
+
+  switch (column->type) {
+    case QTB_COLUMN_TYPE_STR:
+      success = qtb_column_append_str(column, item);
+      break;
+    case QTB_COLUMN_TYPE_INT:
+      success = qtb_column_append_int(column, item);
+      break;
+    case QTB_COLUMN_TYPE_FLOAT:
+      success = qtb_column_append_float(column, item);
+      break;
+    case QTB_COLUMN_TYPE_BOOL:
+      success = qtb_column_append_bool(column, item);
+      break;
+    default:
+      PyErr_SetString(PyExc_TypeError, "append to unknown column type");
+      success = false;
+      break;
+  }
+
+  if (success == true)
+    column->size++;
+
+  return success;
+}
+
+PyObject *qtb_column_get_as_pyobject(QtbColumn *column, size_t i) {
+  // TODO: test failure of all of these in C tests
+  switch (column->type) {
+    case QTB_COLUMN_TYPE_STR:
+      return PyUnicode_FromString(column->data[i].s);
+    case QTB_COLUMN_TYPE_INT:
+      return PyLong_FromLongLong(column->data[i].i);
+    case QTB_COLUMN_TYPE_FLOAT:
+      return PyFloat_FromDouble(column->data[i].f);
+    case QTB_COLUMN_TYPE_BOOL:
+      return PyBool_FromLong((long)column->data[i].b);
+    case QTB_COLUMN_TYPE_ERR:
+      PyErr_SetString(PyExc_TypeError, "");
+      return false;
+  }
 }

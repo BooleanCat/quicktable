@@ -9,7 +9,7 @@ qtb_test_column.o: test_column.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
 qtb_test_append.o: test_append.c
-	$(CC) -o $@ -c $(CFLAGS) $^
+	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
 qtb_tests.o: tests.c
 	$(CC) -o $@ -c $(CFLAGS) $^
