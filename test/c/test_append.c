@@ -7,6 +7,6 @@ void test_nothing(void **state) {
 
 }
 
-const struct CMUnitTest blueprint_tests[] = {
+const struct CMUnitTest append_tests[] = {
   cmocka_unit_test(test_nothing),
 };
