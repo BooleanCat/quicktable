@@ -66,7 +66,7 @@ static PySequenceMethods qtb_table_as_sequence = {
   0,  // sq_inplace_repeat
 };
 
-static PyObject *qtb_table_append(QtbTable *self) {
+static PyObject *qtb_table_append(QtbTable *self, PyObject *row) {
   self->size++;
   Py_RETURN_NONE;
 }
@@ -82,7 +82,7 @@ static PyObject *qtb_table_pop(QtbTable *self) {
 }
 
 static PyMethodDef qtb_table_methods[] = {
-  {"append", (PyCFunction)qtb_table_append, METH_NOARGS, "append"},
+  {"append", (PyCFunction)qtb_table_append, METH_O, "append"},
   {"pop", (PyCFunction)qtb_table_pop, METH_NOARGS, "pop"},
   {NULL, NULL}
 };
