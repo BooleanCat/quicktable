@@ -9,7 +9,7 @@ export PY_LDFLAGS="$( python-config --ldflags )"
 
 pushd "$TEST_DIR" >/dev/null
   make clean
-  make qtb_tests
-  ./qtb_tests
+  make build/qtb_tests
+  ./build/qtb_tests
   make clean
 popd >/dev/null

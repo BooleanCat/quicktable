@@ -1,21 +1,27 @@
-CC = gcc
 CFLAGS = ${PY_CFLAGS}
 LDFLAGS = ${PY_LDFLAGS}
+CC = gcc
 
-qtb_column.o: ../../src/lib/column.c
+_OBJS = column.o test_column.o test_append.o tests.o
+OBJS = $(patsubst %,build/%,$(_OBJS))
+
+
+build/column.o: ../../src/lib/column.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
-qtb_test_column.o: test_column.c
+build/test_column.o: test_column.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
-qtb_test_append.o: test_append.c
+build/test_append.o: test_append.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
-qtb_tests.o: tests.c
+build/tests.o: tests.c
 	$(CC) -o $@ -c $(CFLAGS) $^
 
-qtb_tests: qtb_tests.o qtb_column.o qtb_test_column.o qtb_test_append.o
+build/qtb_tests: $(OBJS)
 	$(CC) $^ -o $@ $(PY_LDFLAGS) -lcmocka
 
+.PHONY: clean
+
 clean:
-	rm -rf qtb_*
+	rm -rf build/*
