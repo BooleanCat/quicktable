@@ -11,7 +11,6 @@ typedef void *(*mallocer)(size_t);
 typedef char *(*strduper)(const char *);
 
 typedef enum {
-  QTB_COLUMN_TYPE_ERR,
   QTB_COLUMN_TYPE_STR,
   QTB_COLUMN_TYPE_INT,
   QTB_COLUMN_TYPE_FLOAT,
@@ -25,12 +24,17 @@ typedef union {
   bool b;
 } QtbColumnData;
 
-typedef struct {
+typedef struct _QtbColumn {
   char *name;
   QtbColumnType type;
   QtbColumnData *data;
   size_t size;
   size_t capacity;
+
+  PyObject *(*get_as_pyobject)(struct _QtbColumn *, size_t);
+  bool (*append)(struct _QtbColumn *, PyObject *);
+  PyObject *(*type_as_pystring)();
+
   strduper strdup;
 } QtbColumn;
 

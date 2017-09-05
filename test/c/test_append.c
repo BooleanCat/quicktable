@@ -109,25 +109,6 @@ void test_qtb_column_append_str_strdup_fails(void **state) {
   free(column);
 }
 
-void test_qtb_column_append_err_column(void **state) {
-  QtbColumn *column;
-  PyObject *descriptor;
-  bool success;
-
-  column = qtb_column_new_succeeds();
-  descriptor = ((TestState *)(*state))->descriptor;
-  qtb_column_init_succeeds(column, descriptor);
-
-  column->type = QTB_COLUMN_TYPE_ERR;
-  success = qtb_column_append(column, PyUnicode_FromString_fixture("Pikachu"));
-  assert_int_equal(success, false);
-  assert_string_equal(get_exception_string(), "append to unknown column type");
-
-  qtb_column_dealloc(column);
-  free(column);
-}
-
 const struct CMUnitTest append_tests[] = {
   cmocka_unit_test_setup_teardown(test_qtb_column_append_str_strdup_fails, setup, teardown),
-  cmocka_unit_test_setup_teardown(test_qtb_column_append_err_column, setup, teardown),
 };

@@ -5,7 +5,7 @@
 #include <Python.h>
 
 #define N_COLUMN_TESTS 8
-#define N_APPEND_TESTS 2
+#define N_APPEND_TESTS 1
 
 extern const struct CMUnitTest column_tests[N_COLUMN_TESTS];
 extern const struct CMUnitTest append_tests[N_APPEND_TESTS];
