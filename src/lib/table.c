@@ -61,7 +61,9 @@ static PyObject *qtb_table_item(QtbTable *self, Py_ssize_t i) {
     return NULL;
   }
 
-  row = PyList_New(self->width);
+  if ((row = PyList_New(self->width)) == NULL)
+    return NULL;
+
   for (Py_ssize_t j = 0; j < self->width; j++) {
     PyList_SET_ITEM(row, j, qtb_column_get_as_pyobject(&self->columns[j], i));
   }

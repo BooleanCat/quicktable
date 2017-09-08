@@ -157,6 +157,7 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
 
   for (size_t i = 0; i < n; i++) {
     columns[i].strdup = &strdup;
+    columns[i].PyTuple_New = &PyTuple_New;
     columns[i].name = NULL;
     columns[i].data = NULL;
   }
@@ -245,7 +246,7 @@ PyObject *qtb_column_as_descriptor(QtbColumn *column) {
   if (
     ((name = PyUnicode_FromString(column->name)) == NULL) ||
     ((type = qtb_column_type_as_pystring(column)) == NULL) ||
-    ((descriptor = PyTuple_New(2)) == NULL)
+    ((descriptor = column->PyTuple_New(2)) == NULL)
   ) {
     Py_XDECREF(name);
     Py_XDECREF(type);

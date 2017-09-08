@@ -8,7 +8,6 @@
 #define QTB_COLUMN_INITIAL_CAPACITY 20
 
 typedef void *(*mallocer)(size_t);
-typedef char *(*strduper)(const char *);
 
 typedef enum {
   QTB_COLUMN_TYPE_STR,
@@ -25,17 +24,20 @@ typedef union {
 } QtbColumnData;
 
 typedef struct _QtbColumn {
+  // Mockable implementation hooks
+  char     *(*strdup)      (const char *);
+  PyObject *(*PyTuple_New) (Py_ssize_t);
+
+  // Methods
+  PyObject *(*get_as_pyobject)  (struct _QtbColumn *, size_t);
+  bool      (*append)           (struct _QtbColumn *, PyObject *);
+  PyObject *(*type_as_pystring) ();
+
   char *name;
   QtbColumnType type;
   QtbColumnData *data;
   size_t size;
   size_t capacity;
-
-  PyObject *(*get_as_pyobject)(struct _QtbColumn *, size_t);
-  bool (*append)(struct _QtbColumn *, PyObject *);
-  PyObject *(*type_as_pystring)();
-
-  strduper strdup;
 } QtbColumn;
 
 QtbColumn *_qtb_column_new_many(size_t n, mallocer m);
