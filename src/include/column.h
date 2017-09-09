@@ -24,9 +24,10 @@ typedef union {
 } QtbColumnData;
 
 typedef struct _QtbColumn {
-  // Mockable implementation hooks
-  char     *(*strdup)      (const char *);
-  PyObject *(*PyTuple_New) (Py_ssize_t);
+  // Override implementation hooks
+  char     *(*strdup)           (const char *);
+  PyObject *(*PyTuple_New)      (Py_ssize_t);
+  char     *(*PyUnicode_AsUTF8) (PyObject *);
 
   // Methods
   PyObject *(*get_as_pyobject)  (struct _QtbColumn *, size_t);

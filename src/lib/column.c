@@ -14,7 +14,7 @@ static bool qtb_column_append_str(QtbColumn *column, PyObject *item) {
     return false;
   }
 
-  if ((s = PyUnicode_AsUTF8(item)) == NULL)
+  if ((s = (*column->PyUnicode_AsUTF8)(item)) == NULL)
     return false;
 
   column->data[column->size].s = (*column->strdup)(s);
@@ -158,6 +158,7 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
   for (size_t i = 0; i < n; i++) {
     columns[i].strdup = &strdup;
     columns[i].PyTuple_New = &PyTuple_New;
+    columns[i].PyUnicode_AsUTF8 = &PyUnicode_AsUTF8;
     columns[i].name = NULL;
     columns[i].data = NULL;
   }
@@ -168,7 +169,7 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
 static bool qtb_column_init_name(QtbColumn *column, PyObject *name) {
   char *name_s;
 
-  name_s = PyUnicode_AsUTF8(name);
+  name_s = (*column->PyUnicode_AsUTF8)(name);
   if (name == NULL)
     return false;
 
