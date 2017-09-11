@@ -73,7 +73,7 @@ static PyObject *qtb_column_type_as_pystring_float() {
 // ===== qtb_column_bool =====
 
 static PyObject *qtb_column_get_as_pyobject_bool(QtbColumn *column, size_t i) {
-  return PyFloat_FromDouble(column->data[i].b);
+  return PyBool_FromLong(column->data[i].b);
 }
 
 static bool qtb_column_append_bool(QtbColumn *column, PyObject *item) {
