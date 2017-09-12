@@ -163,11 +163,11 @@ static void test_qtb_column_init_descriptor_not_sequence(void **state) {
   column = qtb_column_new_succeeds();
 
   result = qtb_column_init(column, Py_None);
-  assert_int_equal(result, false);
-  assert_non_null(PyErr_Occurred());
-  assert_exc_string_equal("descriptor not a sequence");
-
+  qtb_column_dealloc(column);
   free(column);
+
+  assert_int_equal(result, false);
+  assert_exc_string_equal("descriptor not a sequence");
 }
 
 static void test_qtb_column_init_strdup_fails(void **state) {
@@ -198,13 +198,13 @@ static void test_qtb_column_init_free_on_fail(void **state) {
   column = qtb_column_new_succeeds();
 
   success = qtb_column_init(column, descriptor);
-  assert_int_equal(success, false);
-
-  assert_null(column->name);
-  assert_non_null(PyErr_Occurred());
-  assert_exc_string_equal("invalid column type");
-
+  qtb_column_dealloc(column);
+  free(column);
   Py_DECREF(descriptor);
+
+  assert_int_equal(success, false);
+  assert_null(column->name);
+  assert_exc_string_equal("invalid column type");
 }
 
 const struct CMUnitTest column_tests[] = {
