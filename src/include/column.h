@@ -33,6 +33,7 @@ typedef struct _QtbColumn {
   PyObject *(*get_as_pyobject)  (struct _QtbColumn *, size_t);
   bool      (*append)           (struct _QtbColumn *, PyObject *);
   PyObject *(*type_as_pystring) ();
+  void      (*dealloc)          (struct _QtbColumn *);
 
   char *name;
   QtbColumnType type;

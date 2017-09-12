@@ -26,6 +26,11 @@ static bool qtb_column_append_str(QtbColumn *column, PyObject *item) {
   return true;
 }
 
+void qtb_column_dealloc_str(QtbColumn *column) {
+  for (size_t i = 0; i < column->size; i++)
+    free(column->data[i].s);
+}
+
 static PyObject *qtb_column_type_as_pystring_str() {
   return PyUnicode_FromString("str");
 }
@@ -90,27 +95,35 @@ static PyObject *qtb_column_type_as_pystring_bool() {
   return PyUnicode_FromString("bool");
 }
 
+// ===== qtb_column_default =====
+
+void qtb_column_dealloc_default(QtbColumn *column) {}
+
 void qtb_column_init_methods(QtbColumn *column) {
   switch (column->type) {
     case QTB_COLUMN_TYPE_STR:
       column->get_as_pyobject = &qtb_column_get_as_pyobject_str;
       column->append = &qtb_column_append_str;
       column->type_as_pystring = &qtb_column_type_as_pystring_str;
+      column->dealloc = &qtb_column_dealloc_str;
       break;
     case QTB_COLUMN_TYPE_INT:
       column->get_as_pyobject = &qtb_column_get_as_pyobject_int;
       column->append = &qtb_column_append_int;
       column->type_as_pystring = &qtb_column_type_as_pystring_int;
+      column->dealloc = &qtb_column_dealloc_default;
       break;
     case QTB_COLUMN_TYPE_FLOAT:
       column->get_as_pyobject = &qtb_column_get_as_pyobject_float;
       column->append = &qtb_column_append_float;
       column->type_as_pystring = &qtb_column_type_as_pystring_float;
+      column->dealloc = &qtb_column_dealloc_default;
       break;
     case QTB_COLUMN_TYPE_BOOL:
       column->get_as_pyobject = &qtb_column_get_as_pyobject_bool;
       column->append = &qtb_column_append_bool;
       column->type_as_pystring = &qtb_column_type_as_pystring_bool;
+      column->dealloc = &qtb_column_dealloc_default;
       break;
   }
 }
@@ -234,6 +247,8 @@ bool qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n)
 void qtb_column_dealloc(QtbColumn *column) {
   free(column->name);
   column->name = NULL;
+
+  column->dealloc(column);
 
   free(column->data);
   column->data = NULL;
