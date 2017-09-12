@@ -47,7 +47,7 @@ static QtbColumn *qtb_column_new_succeeds() {
   return column;
 }
 
-static char *get_exception_string(void) {
+static char *copy_exception_string(void) {
   PyObject *exc_value;
   PyObject *exc_type;
   PyObject *exc_traceback;
@@ -56,10 +56,20 @@ static char *get_exception_string(void) {
   assert_non_null(PyErr_Occurred());
 
   PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
-  exc_string = PyUnicode_AsUTF8(exc_value);
+  exc_string = strdup(PyUnicode_AsUTF8(exc_value));
+  assert_non_null(exc_string);
   PyErr_Restore(exc_type, exc_value, exc_traceback);
 
   return exc_string;
+}
+
+static void assert_exc_string_equal(const char *test_string) {
+  char *exc_string;
+
+  exc_string = copy_exception_string();
+  assert_string_equal(exc_string, test_string);
+
+  free(exc_string);
 }
 
 static int setup(void **state) {
@@ -119,7 +129,7 @@ void test_qtb_column_append_str_strdup_fails(void **state) {
 
   success = qtb_column_append(column, name);
   assert_int_equal(success, false);
-  assert_string_equal(get_exception_string(), "could not create PyUnicodeobject");
+  assert_exc_string_equal("could not create PyUnicodeobject");
   assert_int_equal(column->size, 0);
 
   Py_DECREF(descriptor);
@@ -142,7 +152,7 @@ void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
 
   success = qtb_column_append(column, name);
   assert_int_equal(success, false);
-  assert_string_equal(get_exception_string(), "PyUnicode_AsUTF8 failed");
+  assert_exc_string_equal("PyUnicode_AsUTF8 failed");
   assert_int_equal(column->size, 0);
 
   Py_DECREF(descriptor);
