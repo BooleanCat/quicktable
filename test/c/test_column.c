@@ -5,11 +5,6 @@
 #include <Python.h>
 #include "column.h"
 
-typedef struct {
-  PyGILState_STATE gstate;
-  PyObject *descriptor;
-} TestState;
-
 static void *failing_malloc(size_t size) {
   return NULL;
 }
@@ -18,28 +13,33 @@ static char *failing_strdup(const char *s) {
   return NULL;
 }
 
-static PyObject *new_descriptor(const char *name, const char* type) {
-  PyObject *descriptor;
+static PyObject *PyUnicode_FromString_succeeds(const char *s) {
+  PyObject *unicode;
 
-  descriptor = PyTuple_New(2);
-  assert_non_null(descriptor);
-
-  PyTuple_SET_ITEM(descriptor, 0, PyUnicode_FromString(name));
-  assert_non_null(PyTuple_GET_ITEM(descriptor, 0));
-
-  PyTuple_SET_ITEM(descriptor, 1, PyUnicode_FromString(type));
-  assert_non_null(PyTuple_GET_ITEM(descriptor, 1));
-
-  return descriptor;
+  unicode = PyUnicode_FromString(s);
+  assert_non_null(unicode);
+  return unicode;
 }
 
-static QtbColumn *checked_qtb_column_new() {
+static QtbColumn *qtb_column_new_succeeds() {
   QtbColumn *column;
 
   column = qtb_column_new();
   assert_non_null(column);
 
   return column;
+}
+
+static PyObject *new_descriptor(const char *name, const char* type) {
+  PyObject *descriptor;
+
+  descriptor = PyTuple_New(2);
+  assert_non_null(descriptor);
+
+  PyTuple_SET_ITEM(descriptor, 0, PyUnicode_FromString_succeeds(name));
+  PyTuple_SET_ITEM(descriptor, 1, PyUnicode_FromString_succeeds(type));
+
+  return descriptor;
 }
 
 static char *get_exception_string(void) {
@@ -59,23 +59,22 @@ static char *get_exception_string(void) {
 }
 
 static int setup(void **state) {
-  TestState *test_state = (TestState *)malloc(sizeof(TestState));
+  PyGILState_STATE *gstate;
 
-  test_state->gstate = PyGILState_Ensure();
-  test_state->descriptor = PyTuple_New(2);
-  test_state->descriptor = new_descriptor("Name", "str");
+  gstate = (PyGILState_STATE *)malloc(sizeof(PyGILState_STATE));
+  *gstate = PyGILState_Ensure();
 
-  *state = (void *)test_state;
+  *state = (void *)gstate;
   return 0;
 }
 
 static int teardown(void **state) {
-  TestState *test_state = (TestState *)(*state);
+  PyGILState_STATE *gstate;
 
-  Py_DECREF(test_state->descriptor);
+  gstate = (PyGILState_STATE *)(*state);
   PyErr_Clear();
-  PyGILState_Release(test_state->gstate);
-  free(test_state);
+  PyGILState_Release(*gstate);
+  free(*state);
 
   return 0;
 }
@@ -99,9 +98,9 @@ static void test_qtb_column_init_does_not_change_descriptor_refcount(void **stat
   PyObject *descriptor;
   Py_ssize_t descriptor_ref_count;
 
-  column = checked_qtb_column_new();
+  column = qtb_column_new_succeeds();
 
-  descriptor = ((TestState *)(*state))->descriptor;
+  descriptor = new_descriptor("Name", "str");
   descriptor_ref_count = Py_REFCNT(descriptor);
 
   qtb_column_init(column, descriptor);
@@ -109,6 +108,7 @@ static void test_qtb_column_init_does_not_change_descriptor_refcount(void **stat
   free(column);
 
   assert_int_equal(descriptor_ref_count, Py_REFCNT(descriptor));
+  Py_DECREF(descriptor);
 }
 
 static void test_qtb_column_init_does_not_change_name_refcount(void **state) {
@@ -116,9 +116,9 @@ static void test_qtb_column_init_does_not_change_name_refcount(void **state) {
   PyObject *descriptor;
   Py_ssize_t name_ref_count;
 
-  column = checked_qtb_column_new();
+  column = qtb_column_new_succeeds();
 
-  descriptor = ((TestState *)(*state))->descriptor;
+  descriptor = new_descriptor("Name", "str");
   name_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 0));
 
   qtb_column_init(column, descriptor);
@@ -126,6 +126,7 @@ static void test_qtb_column_init_does_not_change_name_refcount(void **state) {
   free(column);
 
   assert_int_equal(name_ref_count, Py_REFCNT(PyTuple_GET_ITEM(descriptor, 0)));
+  Py_DECREF(descriptor);
 }
 
 static void test_qtb_column_init_does_not_change_type_refcount(void **state) {
@@ -133,9 +134,9 @@ static void test_qtb_column_init_does_not_change_type_refcount(void **state) {
   PyObject *descriptor;
   Py_ssize_t type_ref_count;
 
-  column = checked_qtb_column_new();
+  column = qtb_column_new_succeeds();
 
-  descriptor = ((TestState *)(*state))->descriptor;
+  descriptor = new_descriptor("Name", "str");
   type_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1));
 
   qtb_column_init(column, descriptor);
@@ -143,13 +144,14 @@ static void test_qtb_column_init_does_not_change_type_refcount(void **state) {
   free(column);
 
   assert_int_equal(type_ref_count, Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1)));
+  Py_DECREF(descriptor);
 }
 
 static void test_qtb_column_init_descriptor_not_sequence(void **state) {
   QtbColumn *column;
   bool result;
 
-  column = checked_qtb_column_new();
+  column = qtb_column_new_succeeds();
 
   result = qtb_column_init(column, Py_None);
   assert_int_equal(result, false);
@@ -164,14 +166,15 @@ static void test_qtb_column_init_strdup_fails(void **state) {
   PyObject *descriptor;
   bool success;
 
-  column = checked_qtb_column_new();
+  column = qtb_column_new_succeeds();
   column->strdup = &failing_strdup;
 
-  descriptor = ((TestState *)(*state))->descriptor;
+  descriptor = new_descriptor("Name", "str");
 
   success = qtb_column_init(column, descriptor);
   qtb_column_dealloc(column);
   free(column);
+  Py_DECREF(descriptor);
 
   assert_int_equal(success, false);
   assert_string_equal(get_exception_string(), "failed to initialise column");
@@ -183,7 +186,7 @@ static void test_qtb_column_init_free_on_fail(void **state) {
   bool success;
 
   descriptor = new_descriptor("Name", "invalid");
-  column = checked_qtb_column_new();
+  column = qtb_column_new_succeeds();
 
   success = qtb_column_init(column, descriptor);
   assert_int_equal(success, false);

@@ -5,10 +5,6 @@
 #include <Python.h>
 #include "column.h"
 
-typedef struct {
-  PyGILState_STATE gstate;
-} TestState;
-
 static char *failing_strdup(const char *s) {
   return NULL;
 }
@@ -18,27 +14,24 @@ static char *failing_PyUnicode_AsUTF8(PyObject *s) {
   return NULL;
 }
 
-static PyObject *new_descriptor(const char *name, const char* type) {
-  PyObject *descriptor;
-
-  descriptor = PyTuple_New(2);
-  assert_non_null(descriptor);
-
-  PyTuple_SET_ITEM(descriptor, 0, PyUnicode_FromString(name));
-  assert_non_null(PyTuple_GET_ITEM(descriptor, 0));
-
-  PyTuple_SET_ITEM(descriptor, 1, PyUnicode_FromString(type));
-  assert_non_null(PyTuple_GET_ITEM(descriptor, 1));
-
-  return descriptor;
-}
-
 static PyObject *PyUnicode_FromString_succeeds(const char *s) {
   PyObject *unicode;
 
   unicode = PyUnicode_FromString(s);
   assert_non_null(unicode);
   return unicode;
+}
+
+static PyObject *new_descriptor(const char *name, const char* type) {
+  PyObject *descriptor;
+
+  descriptor = PyTuple_New(2);
+  assert_non_null(descriptor);
+
+  PyTuple_SET_ITEM(descriptor, 0, PyUnicode_FromString_succeeds(name));
+  PyTuple_SET_ITEM(descriptor, 1, PyUnicode_FromString_succeeds(type));
+
+  return descriptor;
 }
 
 static void qtb_column_init_succeeds(QtbColumn *column, PyObject *descriptor) {
@@ -70,20 +63,22 @@ static char *get_exception_string(void) {
 }
 
 static int setup(void **state) {
-  TestState *test_state = (TestState *)malloc(sizeof(TestState));
+  PyGILState_STATE *gstate;
 
-  test_state->gstate = PyGILState_Ensure();
-  *state = (void *)test_state;
+  gstate = (PyGILState_STATE *)malloc(sizeof(PyGILState_STATE));
+  *gstate = PyGILState_Ensure();
 
+  *state = (void *)gstate;
   return 0;
 }
 
 static int teardown(void **state) {
-  TestState *test_state = (TestState *)(*state);
+  PyGILState_STATE *gstate;
 
+  gstate = (PyGILState_STATE *)(*state);
   PyErr_Clear();
-  PyGILState_Release(test_state->gstate);
-  free(test_state);
+  PyGILState_Release(*gstate);
+  free(*state);
 
   return 0;
 }
