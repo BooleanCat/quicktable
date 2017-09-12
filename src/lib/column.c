@@ -203,6 +203,9 @@ bool qtb_column_init(QtbColumn *column, PyObject *descriptor) {
   if (fast_descriptor == NULL)
     return false;
 
+  column->size = 0;
+  column->capacity = QTB_COLUMN_INITIAL_CAPACITY;
+
   if (
     !qtb_column_init_name(column, PySequence_Fast_GET_ITEM(fast_descriptor, 0))
     || !qtb_column_type_init(column, PySequence_Fast_GET_ITEM(fast_descriptor, 1))
@@ -212,8 +215,6 @@ bool qtb_column_init(QtbColumn *column, PyObject *descriptor) {
     success = false;
   }
 
-  column->size = 0;
-  column->capacity = QTB_COLUMN_INITIAL_CAPACITY;
   qtb_column_init_methods(column);
 
   Py_DECREF(fast_descriptor);
@@ -248,7 +249,8 @@ void qtb_column_dealloc(QtbColumn *column) {
   free(column->name);
   column->name = NULL;
 
-  column->dealloc(column);
+  if (column->size > 0)
+    column->dealloc(column);
 
   free(column->data);
   column->data = NULL;

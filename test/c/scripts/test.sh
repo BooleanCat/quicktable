@@ -26,7 +26,9 @@ pushd "$TEST_DIR" >/dev/null
   make build/qtb_tests
 
   if [ ! -z "$UNTILITFAILS" ]; then
-    while true; do
+
+    for i in $( seq 1 1000 ); do
+      echo "Attempt number $i..."
       ./build/qtb_tests
     done
   else

@@ -42,20 +42,29 @@ static PyObject *new_descriptor(const char *name, const char* type) {
   return descriptor;
 }
 
-static char *get_exception_string(void) {
+static char *copy_exception_string(void) {
   PyObject *exc_value;
   PyObject *exc_type;
   PyObject *exc_traceback;
   char *exc_string;
 
-  if (PyErr_Occurred() == NULL)
-    return NULL;
+  assert_non_null(PyErr_Occurred());
 
   PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
-  exc_string = PyUnicode_AsUTF8(exc_value);
+  exc_string = strdup(PyUnicode_AsUTF8(exc_value));
+  assert_non_null(exc_string);
   PyErr_Restore(exc_type, exc_value, exc_traceback);
 
   return exc_string;
+}
+
+static void assert_exc_string_equal(const char *test_string) {
+  char *exc_string;
+
+  exc_string = copy_exception_string();
+  assert_string_equal(exc_string, test_string);
+
+  free(exc_string);
 }
 
 static int setup(void **state) {
@@ -156,7 +165,7 @@ static void test_qtb_column_init_descriptor_not_sequence(void **state) {
   result = qtb_column_init(column, Py_None);
   assert_int_equal(result, false);
   assert_non_null(PyErr_Occurred());
-  assert_string_equal(get_exception_string(), "descriptor not a sequence");
+  assert_exc_string_equal("descriptor not a sequence");
 
   free(column);
 }
@@ -177,7 +186,7 @@ static void test_qtb_column_init_strdup_fails(void **state) {
   Py_DECREF(descriptor);
 
   assert_int_equal(success, false);
-  assert_string_equal(get_exception_string(), "failed to initialise column");
+  assert_exc_string_equal("failed to initialise column");
 }
 
 static void test_qtb_column_init_free_on_fail(void **state) {
@@ -193,7 +202,7 @@ static void test_qtb_column_init_free_on_fail(void **state) {
 
   assert_null(column->name);
   assert_non_null(PyErr_Occurred());
-  assert_string_equal(get_exception_string(), "invalid column type");
+  assert_exc_string_equal("invalid column type");
 
   Py_DECREF(descriptor);
 }

@@ -103,14 +103,15 @@ void test_qtb_column_append(void **state) {
   name = PyUnicode_FromString_succeeds("Pikachu");
   column = qtb_column_new_succeeds();
   qtb_column_init_succeeds(column, descriptor);
+  Py_DECREF(descriptor);
 
   success = qtb_column_append(column, name);
+  Py_DECREF(name);
+
   assert_int_equal(success, true);
   assert_int_equal(column->size, 1);
   assert_string_equal("Pikachu", column->data[0].s);
 
-  Py_DECREF(name);
-  Py_DECREF(descriptor);
   qtb_column_dealloc(column);
   free(column);
 }
@@ -124,18 +125,19 @@ void test_qtb_column_append_str_strdup_fails(void **state) {
   column = qtb_column_new_succeeds();
   descriptor = new_descriptor("Name", "str");
   name = PyUnicode_FromString_succeeds("Pikachu");
+
   qtb_column_init_succeeds(column, descriptor);
+  Py_DECREF(descriptor);
   column->strdup = &failing_strdup;
 
   success = qtb_column_append(column, name);
-  assert_int_equal(success, false);
-  assert_exc_string_equal("could not create PyUnicodeobject");
-  assert_int_equal(column->size, 0);
-
-  Py_DECREF(descriptor);
   Py_DECREF(name);
   qtb_column_dealloc(column);
   free(column);
+
+  assert_int_equal(success, false);
+  assert_exc_string_equal("could not create PyUnicodeobject");
+  assert_int_equal(column->size, 0);
 }
 
 void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
@@ -148,6 +150,7 @@ void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
   descriptor = new_descriptor("Name", "str");
   name = PyUnicode_FromString_succeeds("Pikachu");
   qtb_column_init_succeeds(column, descriptor);
+  Py_DECREF(descriptor);
   column->PyUnicode_AsUTF8 = &failing_PyUnicode_AsUTF8;
 
   success = qtb_column_append(column, name);
@@ -155,7 +158,6 @@ void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
   assert_exc_string_equal("PyUnicode_AsUTF8 failed");
   assert_int_equal(column->size, 0);
 
-  Py_DECREF(descriptor);
   Py_DECREF(name);
   qtb_column_dealloc(column);
   free(column);
