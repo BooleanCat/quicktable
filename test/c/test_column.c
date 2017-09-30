@@ -1,10 +1,4 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
-#include <Python.h>
-#include "column.h"
-#include "helpers.h"
+#include "tests.h"
 
 static int setup(void **state) {
   PyGILState_STATE *gstate;
@@ -146,7 +140,7 @@ static void test_qtb_column_init_free_on_fail(void **state) {
   assert_exc_string_equal("invalid column type");
 }
 
-const struct CMUnitTest column_tests[] = {
+static const struct CMUnitTest tests[] = {
   cmocka_unit_test(test_qtb_column_new_fails),
   cmocka_unit_test(test_qtb_column_new_many_fails),
 
@@ -157,3 +151,7 @@ const struct CMUnitTest column_tests[] = {
   cmocka_unit_test_setup_teardown(test_qtb_column_init_strdup_fails, setup, teardown),
   cmocka_unit_test_setup_teardown(test_qtb_column_init_free_on_fail, setup, teardown),
 };
+
+int test_column_run() {
+  return cmocka_run_group_tests(tests, NULL, NULL);
+}

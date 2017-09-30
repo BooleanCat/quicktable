@@ -18,7 +18,7 @@ build/test_append.o: test_append.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
 build/tests.o: tests.c
-	$(CC) -o $@ -c $(CFLAGS) $^
+	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
 build/qtb_tests: $(OBJS)
 	$(CC) $^ -o $@ $(PY_LDFLAGS) -lcmocka

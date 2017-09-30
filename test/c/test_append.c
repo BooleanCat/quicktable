@@ -1,10 +1,4 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
-#include <Python.h>
-#include "column.h"
-#include "helpers.h"
+#include "tests.h"
 
 static int setup(void **state) {
   PyGILState_STATE *gstate;
@@ -27,7 +21,7 @@ static int teardown(void **state) {
   return 0;
 }
 
-void test_qtb_column_append(void **state) {
+static void test_qtb_column_append(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *name;
@@ -50,7 +44,7 @@ void test_qtb_column_append(void **state) {
   free(column);
 }
 
-void test_qtb_column_append_str_strdup_fails(void **state) {
+static void test_qtb_column_append_str_strdup_fails(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *name;
@@ -74,7 +68,7 @@ void test_qtb_column_append_str_strdup_fails(void **state) {
   assert_int_equal(column->size, 0);
 }
 
-void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
+static void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *name;
@@ -97,8 +91,12 @@ void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
   free(column);
 }
 
-const struct CMUnitTest append_tests[] = {
-  cmocka_unit_test_setup_teardown(test_qtb_column_append, setup, teardown),
-  cmocka_unit_test_setup_teardown(test_qtb_column_append_str_strdup_fails, setup, teardown),
-  cmocka_unit_test_setup_teardown(test_qtb_column_append_str_PyUnicode_AsUTF8_fails, setup, teardown),
+static const struct CMUnitTest tests[] = {
+    cmocka_unit_test_setup_teardown(test_qtb_column_append, setup, teardown),
+    cmocka_unit_test_setup_teardown(test_qtb_column_append_str_strdup_fails, setup, teardown),
+    cmocka_unit_test_setup_teardown(test_qtb_column_append_str_PyUnicode_AsUTF8_fails, setup, teardown),
 };
+
+int test_append_run() {
+  return cmocka_run_group_tests(tests, NULL, NULL);
+}
