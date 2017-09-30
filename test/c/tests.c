@@ -1,3 +1,4 @@
+#include <Python.h>
 #include "tests.h"
 
 int main(void) {

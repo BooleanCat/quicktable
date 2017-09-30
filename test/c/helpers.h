@@ -1,14 +1,9 @@
 #ifndef QTAB_HELPERS_H
 #define QTAB_HELPERS_H
 
-#include <stdlib.h>
-#include <stdarg.h>
 #include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
 #include <Python.h>
 #include "column.h"
-#include "helpers.h"
 
 void assert_exc_string_equal(const char *);
 
