@@ -6,6 +6,7 @@
 #include <Python.h>
 
 #define QTB_COLUMN_INITIAL_CAPACITY 20
+#define QTB_COLUMN_GROWTH_COEFFICIENT 1.2
 
 typedef void *(*mallocer)(size_t);
 

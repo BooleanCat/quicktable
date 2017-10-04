@@ -132,7 +132,29 @@ PyObject *qtb_column_get_as_pyobject(QtbColumn *column, size_t i) {
   return column->get_as_pyobject(column, i);
 }
 
+static bool qtb_column_grow(QtbColumn *column) {
+  size_t new_capacity;
+  QtbColumnData *new_data;
+
+  new_capacity = QTB_COLUMN_GROWTH_COEFFICIENT * column->capacity;
+  new_data = (QtbColumnData *)realloc(column->data, new_capacity * sizeof(QtbColumnData));
+  if (new_data == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "failed to growth column");
+    return false;
+  }
+
+  column->data = new_data;
+  column->capacity = new_capacity;
+
+  return true;
+}
+
 bool qtb_column_append(QtbColumn *column, PyObject *item) {
+  if (column->capacity == column->size) {
+    if (!qtb_column_grow(column))
+      return false;
+  }
+
   if (!column->append(column, item))
     return false;
 

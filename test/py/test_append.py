@@ -16,6 +16,11 @@ def test_append(table):
     table.append(['Pikachu', 12, True, 12.5])
 
 
+def test_append_1000_times(table):
+    for i in range(1000):
+        table.append(['Pikachu', i, True, 12.0])
+
+
 def test_append_non_sequence_is_invalid(table):
     with pytest.raises(TypeError) as excinfo:
         table.append(None)
