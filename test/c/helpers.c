@@ -43,6 +43,10 @@ void *failing_malloc(size_t size) {
   return NULL;
 }
 
+void *failing_realloc(void *ptr, size_t size) {
+  return NULL;
+}
+
 PyObject *PyUnicode_FromString_succeeds(const char *s) {
   PyObject *unicode;
 
@@ -62,6 +66,13 @@ QtbColumn *qtb_column_new_succeeds() {
   assert_non_null(column);
 
   return column;
+}
+
+void qtb_column_append_succeeds(QtbColumn *column, PyObject *item) {
+  bool success;
+
+  success = qtb_column_append(column, item);
+  assert_int_equal(success, true);
 }
 
 PyObject *new_descriptor(const char *name, const char *type) {

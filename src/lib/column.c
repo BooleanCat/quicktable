@@ -137,7 +137,7 @@ static bool qtb_column_grow(QtbColumn *column) {
   QtbColumnData *new_data;
 
   new_capacity = QTB_COLUMN_GROWTH_COEFFICIENT * column->capacity;
-  new_data = (QtbColumnData *)realloc(column->data, new_capacity * sizeof(QtbColumnData));
+  new_data = (QtbColumnData *)column->realloc(column->data, new_capacity * sizeof(QtbColumnData));
   if (new_data == NULL) {
     PyErr_SetString(PyExc_MemoryError, "failed to growth column");
     return false;
@@ -192,6 +192,7 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
 
   for (size_t i = 0; i < n; i++) {
     columns[i].strdup = &strdup;
+    columns[i].realloc = &realloc;
     columns[i].PyTuple_New = &PyTuple_New;
     columns[i].PyUnicode_AsUTF8 = &PyUnicode_AsUTF8;
     columns[i].name = NULL;

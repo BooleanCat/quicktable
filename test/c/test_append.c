@@ -97,10 +97,37 @@ static void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
   free(column);
 }
 
+static void test_qtb_column_append_grow_fails(void **state) {
+  QtbColumn *column;
+  PyObject *descriptor;
+  PyObject *name;
+  bool success;
+
+  column = qtb_column_new_succeeds();
+  descriptor = new_descriptor("Name", "str");
+  qtb_column_init_succeeds(column, descriptor);
+  column->realloc = &failing_realloc;
+
+  name = PyUnicode_FromString_succeeds("Pikachu");
+
+  for (size_t i = 0; i < QTB_COLUMN_INITIAL_CAPACITY; i++)
+    qtb_column_append_succeeds(column, name);
+
+  success = qtb_column_append(column, name);
+  assert_int_equal(success, false);
+  assert_int_equal(column->size, QTB_COLUMN_INITIAL_CAPACITY);
+  assert_exc_string_equal("failed to growth column");
+
+  Py_DECREF(name);
+  qtb_column_dealloc(column);
+  free(column);
+}
+
 static const struct CMUnitTest tests[] = {
     cmocka_unit_test_setup_teardown(test_qtb_column_append, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtb_column_append_str_strdup_fails, setup, teardown),
     cmocka_unit_test_setup_teardown(test_qtb_column_append_str_PyUnicode_AsUTF8_fails, setup, teardown),
+    cmocka_unit_test_setup_teardown(test_qtb_column_append_grow_fails, setup, teardown),
 };
 
 int test_append_run() {

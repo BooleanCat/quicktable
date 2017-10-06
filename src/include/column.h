@@ -27,6 +27,7 @@ typedef union {
 typedef struct _QtbColumn {
   // Override implementation hooks
   char     *(*strdup)           (const char *);
+  void     *(*realloc)          (void *, size_t);
   PyObject *(*PyTuple_New)      (Py_ssize_t);
   char     *(*PyUnicode_AsUTF8) (PyObject *);
 
