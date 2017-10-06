@@ -105,7 +105,7 @@ static void test_qtb_column_init_descriptor_not_sequence(void **state) {
   qtb_column_dealloc(column);
   free(column);
 
-  assert_int_equal(result, false);
+  assert_false(result);
   assert_exc_string_equal("descriptor not a sequence");
 }
 
@@ -124,7 +124,7 @@ static void test_qtb_column_init_strdup_fails(void **state) {
   free(column);
   Py_DECREF(descriptor);
 
-  assert_int_equal(success, false);
+  assert_false(success);
   assert_exc_string_equal("failed to initialise column");
 }
 
@@ -141,7 +141,7 @@ static void test_qtb_column_init_free_on_fail(void **state) {
   free(column);
   Py_DECREF(descriptor);
 
-  assert_int_equal(success, false);
+  assert_false(success);
   assert_null(column->name);
   assert_exc_string_equal("invalid column type");
 }

@@ -42,7 +42,7 @@ static void test_qtb_column_append(void **state) {
   success = qtb_column_append(column, name);
   Py_DECREF(name);
 
-  assert_int_equal(success, true);
+  assert_true(success);
   assert_int_equal(column->size, 1);
   assert_string_equal("Pikachu", column->data[0].s);
 
@@ -66,12 +66,13 @@ static void test_qtb_column_append_str_strdup_fails(void **state) {
 
   success = qtb_column_append(column, name);
   Py_DECREF(name);
-  qtb_column_dealloc(column);
-  free(column);
 
-  assert_int_equal(success, false);
+  assert_false(success);
   assert_exc_string_equal("could not create PyUnicodeobject");
   assert_int_equal(column->size, 0);
+
+  qtb_column_dealloc(column);
+  free(column);
 }
 
 static void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
@@ -88,7 +89,7 @@ static void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
   column->PyUnicode_AsUTF8 = &failing_PyUnicode_AsUTF8;
 
   success = qtb_column_append(column, name);
-  assert_int_equal(success, false);
+  assert_false(success);
   assert_exc_string_equal("PyUnicode_AsUTF8 failed");
   assert_int_equal(column->size, 0);
 
@@ -114,7 +115,7 @@ static void test_qtb_column_append_grow_fails(void **state) {
     qtb_column_append_succeeds(column, name);
 
   success = qtb_column_append(column, name);
-  assert_int_equal(success, false);
+  assert_false(success);
   assert_int_equal(column->size, QTB_COLUMN_INITIAL_CAPACITY);
   assert_exc_string_equal("failed to growth column");
 

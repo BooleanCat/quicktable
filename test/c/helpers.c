@@ -56,7 +56,7 @@ PyObject *PyUnicode_FromString_succeeds(const char *s) {
 }
 
 void qtb_column_init_succeeds(QtbColumn *column, PyObject *descriptor) {
-  assert_int_equal(qtb_column_init(column, descriptor), true);
+  assert_true(qtb_column_init(column, descriptor));
 }
 
 QtbColumn *qtb_column_new_succeeds() {
@@ -69,10 +69,7 @@ QtbColumn *qtb_column_new_succeeds() {
 }
 
 void qtb_column_append_succeeds(QtbColumn *column, PyObject *item) {
-  bool success;
-
-  success = qtb_column_append(column, item);
-  assert_int_equal(success, true);
+  assert_true(qtb_column_append(column, item));
 }
 
 PyObject *new_descriptor(const char *name, const char *type) {
