@@ -32,10 +32,10 @@ typedef struct _QtbColumn {
   char     *(*PyUnicode_AsUTF8) (PyObject *);
 
   // Methods
-  PyObject *(*get_as_pyobject)  (struct _QtbColumn *, size_t);
-  bool      (*append)           (struct _QtbColumn *, PyObject *);
-  PyObject *(*type_as_pystring) (void);
-  void      (*dealloc)          (struct _QtbColumn *);
+  PyObject   *(*get_as_pyobject) (struct _QtbColumn *, size_t);
+  bool        (*append)          (struct _QtbColumn *, PyObject *);
+  const char *(*type_as_str)     (void);
+  void        (*dealloc)         (struct _QtbColumn *);
 
   char *name;
   QtbColumnType type;
