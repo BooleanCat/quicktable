@@ -48,7 +48,7 @@ table = quicktable.Table([
 table.append(['Pikachu', 24, True, 23.1])
 table.append(['Charmander', 12, False, 20.7])
 row = table.pop()
-table = table.sort('Name')
+table.sort('Name')
 print(table)
 len(table)
 table.blueprint
