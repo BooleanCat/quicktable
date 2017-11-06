@@ -161,6 +161,10 @@ static PyGetSetDef qtb_table_getsetters[] = {
   {NULL}
 };
 
+static PyObject *qtb_table_tp_repr(QtbTable *self) {
+  return PyUnicode_FromString("");
+}
+
 PyTypeObject QtbTableType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "quicktable.Table",  // tp_name
@@ -171,7 +175,7 @@ PyTypeObject QtbTableType = {
     0,  // tp_getattr
     0,  // tp_setattr
     0,  // tp_reserved
-    0,  // tp_repr
+    (reprfunc)qtb_table_tp_repr,  // tp_repr
     0,  // tp_as_number
     &qtb_table_as_sequence,  // tp_as_sequence
     0,  // tp_as_mapping
