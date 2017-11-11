@@ -7,5 +7,6 @@ int main(void) {
   return (
     test_append_run()
     || test_column_run()
+    || test_print_run()
   );
 }

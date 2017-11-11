@@ -55,5 +55,6 @@ void qtb_column_dealloc(QtbColumn *column);
 PyObject *qtb_column_as_descriptor(QtbColumn *column);
 bool qtb_column_append(QtbColumn *column, PyObject *item);
 PyObject *qtb_column_get_as_pyobject(QtbColumn *column, size_t i);
+const char *qtb_column_type_as_str(QtbColumn *column);
 
 #endif

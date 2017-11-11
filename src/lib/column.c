@@ -162,7 +162,7 @@ bool qtb_column_append(QtbColumn *column, PyObject *item) {
   return true;
 }
 
-static const char *qtb_column_type_as_str(QtbColumn *column) {
+const char *qtb_column_type_as_str(QtbColumn *column) {
   return column->type_as_str();
 }
 

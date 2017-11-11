@@ -3,5 +3,6 @@
 
 int test_append_run(void);
 int test_column_run(void);
+int test_print_run(void);
 
 #endif
