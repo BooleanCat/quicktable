@@ -27,6 +27,7 @@ typedef union {
 typedef struct _QtbColumn {
   // Override implementation hooks
   char     *(*strdup)           (const char *);
+  void     *(*malloc)           (size_t);
   void     *(*realloc)          (void *, size_t);
   PyObject *(*PyTuple_New)      (Py_ssize_t);
   char     *(*PyUnicode_AsUTF8) (PyObject *);
@@ -35,6 +36,7 @@ typedef struct _QtbColumn {
   PyObject   *(*get_as_pyobject) (struct _QtbColumn *, size_t);
   bool        (*append)          (struct _QtbColumn *, PyObject *);
   const char *(*type_as_str)     (void);
+  char       *(*cell_repr)       (struct _QtbColumn *, size_t);
   void        (*dealloc)         (struct _QtbColumn *);
 
   char *name;
@@ -56,5 +58,7 @@ PyObject *qtb_column_as_descriptor(QtbColumn *column);
 bool qtb_column_append(QtbColumn *column, PyObject *item);
 PyObject *qtb_column_get_as_pyobject(QtbColumn *column, size_t i);
 const char *qtb_column_type_as_str(QtbColumn *column);
+char *qtb_column_header_repr(QtbColumn *column);
+char *qtb_column_cell_repr(QtbColumn *column, size_t i);
 
 #endif

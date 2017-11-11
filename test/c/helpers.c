@@ -55,6 +55,30 @@ PyObject *PyUnicode_FromString_succeeds(const char *s) {
   return unicode;
 }
 
+PyObject *PyLong_FromLongLong_succeeds(long long n) {
+  PyObject *py_long;
+
+  py_long = PyLong_FromLongLong(n);
+  assert_non_null(py_long);
+  return py_long;
+}
+
+PyObject *PyFloat_FromDouble_succeeds(double n) {
+  PyObject *py_float;
+
+  py_float = PyFloat_FromDouble(n);
+  assert_non_null(py_float);
+  return py_float;
+}
+
+PyObject *PyBool_FromLong_succeeds(long n) {
+  PyObject *py_bool;
+
+  py_bool = PyBool_FromLong(n);
+  assert_non_null(py_bool);
+  return py_bool;
+}
+
 void qtb_column_init_succeeds(QtbColumn *column, PyObject *descriptor) {
   assert_true(qtb_column_init(column, descriptor));
 }

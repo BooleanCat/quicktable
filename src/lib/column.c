@@ -35,6 +35,16 @@ static const char *qtb_column_type_as_str_str() {
   return "str";
 }
 
+static char *qtb_column_cell_repr_str(QtbColumn *column, size_t i) {
+  char *copy;
+
+  copy = column->strdup(column->data[i].s);
+  if (copy == NULL)
+    PyErr_SetString(PyExc_MemoryError, "failed allocate memory for cell repr");
+
+  return copy;
+}
+
 // ===== qtb_column_int =====
 
 static PyObject *qtb_column_get_as_pyobject_int(QtbColumn *column, size_t i) {
@@ -53,6 +63,22 @@ static bool qtb_column_append_int(QtbColumn *column, PyObject *item) {
 
 static const char *qtb_column_type_as_str_int() {
   return "int";
+}
+
+static char *qtb_column_cell_repr_int(QtbColumn *column, size_t i) {
+  char *cell_repr;
+  size_t size;
+
+  size = snprintf(NULL, 0, "%lld", column->data[i].i);
+
+  cell_repr = (char *)column->malloc(sizeof(char) * size + 1);
+  if (cell_repr == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "failed allocate memory for cell repr");
+    return NULL;
+  }
+
+  snprintf(cell_repr, size + 1, "%lld", column->data[i].i);
+  return cell_repr;
 }
 
 // ===== qtb_column_float =====
@@ -75,6 +101,22 @@ static const char *qtb_column_type_as_str_float() {
   return "float";
 }
 
+static char *qtb_column_cell_repr_float(QtbColumn *column, size_t i) {
+  char *cell_repr;
+  size_t size;
+
+  size = snprintf(NULL, 0, "%.2f", column->data[i].f);
+
+  cell_repr = (char *)column->malloc(sizeof(char) * size + 1);
+  if (cell_repr == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "failed allocate memory for cell repr");
+    return NULL;
+  }
+
+  snprintf(cell_repr, size + 1, "%.2f", column->data[i].f);
+  return cell_repr;
+}
+
 // ===== qtb_column_bool =====
 
 static PyObject *qtb_column_get_as_pyobject_bool(QtbColumn *column, size_t i) {
@@ -95,6 +137,16 @@ static const char *qtb_column_type_as_str_bool() {
   return "bool";
 }
 
+static char *qtb_column_cell_repr_bool(QtbColumn *column, size_t i) {
+  char *cell_repr;
+
+  cell_repr = column->strdup(column->data[i].b ? "True" : "False");
+  if (cell_repr == NULL)
+    PyErr_SetString(PyExc_MemoryError, "failed allocate memory for cell repr");
+
+  return cell_repr;
+}
+
 // ===== qtb_column_default =====
 
 void qtb_column_dealloc_default(QtbColumn *column) {}
@@ -105,24 +157,28 @@ void qtb_column_init_methods(QtbColumn *column) {
       column->get_as_pyobject = &qtb_column_get_as_pyobject_str;
       column->append = &qtb_column_append_str;
       column->type_as_str = &qtb_column_type_as_str_str;
+      column->cell_repr = &qtb_column_cell_repr_str;
       column->dealloc = &qtb_column_dealloc_str;
       break;
     case QTB_COLUMN_TYPE_INT:
       column->get_as_pyobject = &qtb_column_get_as_pyobject_int;
       column->append = &qtb_column_append_int;
       column->type_as_str = &qtb_column_type_as_str_int;
+      column->cell_repr = &qtb_column_cell_repr_int;
       column->dealloc = &qtb_column_dealloc_default;
       break;
     case QTB_COLUMN_TYPE_FLOAT:
       column->get_as_pyobject = &qtb_column_get_as_pyobject_float;
       column->append = &qtb_column_append_float;
       column->type_as_str = &qtb_column_type_as_str_float;
+      column->cell_repr = &qtb_column_cell_repr_float;
       column->dealloc = &qtb_column_dealloc_default;
       break;
     case QTB_COLUMN_TYPE_BOOL:
       column->get_as_pyobject = &qtb_column_get_as_pyobject_bool;
       column->append = &qtb_column_append_bool;
       column->type_as_str = &qtb_column_type_as_str_bool;
+      column->cell_repr = &qtb_column_cell_repr_bool;
       column->dealloc = &qtb_column_dealloc_default;
       break;
   }
@@ -192,6 +248,7 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
 
   for (size_t i = 0; i < n; i++) {
     columns[i].strdup = &strdup;
+    columns[i].malloc = &malloc;
     columns[i].realloc = &realloc;
     columns[i].PyTuple_New = &PyTuple_New;
     columns[i].PyUnicode_AsUTF8 = &PyUnicode_AsUTF8;
@@ -298,4 +355,23 @@ PyObject *qtb_column_as_descriptor(QtbColumn *column) {
   PyTuple_SET_ITEM(descriptor, 1, type);
 
   return descriptor;
+}
+
+char *qtb_column_header_repr(QtbColumn *column) {
+  int size;
+  char *header;
+
+  size = 4 + strlen(column->name) + strlen(qtb_column_type_as_str(column));
+  header = (char *)column->malloc(sizeof(char) * (size_t)size);
+  if (header == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "failed allocate memory for header repr");
+    return NULL;
+  }
+
+  sprintf(header, "%s (%s)", column->name, qtb_column_type_as_str(column));
+  return header;
+}
+
+char *qtb_column_cell_repr(QtbColumn *column, size_t i) {
+  return column->cell_repr(column, i);
 }
