@@ -222,12 +222,12 @@ bool qtb_column_init(QtbColumn *column, PyObject *descriptor) {
   PyObject *fast_descriptor;
   bool success = true;
 
+  column->size = 0;
+  column->capacity = QTB_COLUMN_INITIAL_CAPACITY;
+
   fast_descriptor = PySequence_Fast(descriptor, "descriptor not a sequence");
   if (fast_descriptor == NULL)
     return false;
-
-  column->size = 0;
-  column->capacity = QTB_COLUMN_INITIAL_CAPACITY;
 
   if (
     !qtb_column_init_name(column, PySequence_Fast_GET_ITEM(fast_descriptor, 0))
