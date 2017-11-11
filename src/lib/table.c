@@ -162,7 +162,40 @@ static PyGetSetDef qtb_table_getsetters[] = {
 };
 
 static PyObject *qtb_table_tp_repr(QtbTable *self) {
-  return PyUnicode_FromString("");
+  char *header_repr;
+  size_t size;
+  size_t offset;
+  char *repr_str;
+  PyObject *repr;
+
+  size = 0;
+  offset = 0;
+
+  for (size_t i = 0; i < (size_t)self->width; i++) {
+    header_repr = qtb_column_header_repr(&self->columns[i]);
+    size += 3 + strlen(header_repr);
+    free(header_repr);
+  }
+
+  repr_str = (char *)calloc(size + 2, sizeof(char));
+  if (repr_str == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "Oops.");
+    return NULL;
+  }
+
+  for (size_t i = 0; i < (size_t)self->width; i++) {
+    header_repr = qtb_column_header_repr(&self->columns[i]);
+    offset += snprintf(&repr_str[offset], 4 + strlen(header_repr), "| %s ", header_repr);
+    free(header_repr);
+  }
+
+  if (offset)
+    repr_str[offset] = '|';
+
+  repr = PyUnicode_FromString(repr_str);
+  free(repr_str);
+
+  return repr;
 }
 
 PyTypeObject QtbTableType = {

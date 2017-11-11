@@ -15,3 +15,8 @@ def table():
 
 def test_print_empty_table():
     assert str(quicktable.Table([])) == ''
+
+
+def test_print_len_0_table(table):
+    expected = "| Name (str) | Level (int) | Wild (bool) | Power (float) |"
+    assert str(table) == expected
