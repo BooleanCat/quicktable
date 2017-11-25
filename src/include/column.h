@@ -51,6 +51,9 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m);
 #define _qtb_column_new(m) _qtb_column_new_many(1, m);
 #define qtb_column_new() _qtb_column_new_many(1, &malloc)
 
+#define MIN(a, b) (a < b ? a : b)
+#define MAX(a, b) (a > b ? a : b)
+
 bool qtb_column_init(QtbColumn *column, PyObject *descriptor);
 bool qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n);
 void qtb_column_dealloc(QtbColumn *column);
@@ -60,5 +63,6 @@ PyObject *qtb_column_get_as_pyobject(QtbColumn *column, size_t i);
 const char *qtb_column_type_as_str(QtbColumn *column);
 char *qtb_column_header_repr(QtbColumn *column);
 char *qtb_column_cell_repr(QtbColumn *column, size_t i);
+int qtb_column_repr_longest_of_first_five(QtbColumn *column);
 
 #endif

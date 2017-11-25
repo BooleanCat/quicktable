@@ -146,6 +146,145 @@ static void test_qtb_column_init_free_on_fail(void **state) {
   assert_exc_string_equal("invalid column type");
 }
 
+static void test_qtb_column_repr_longest_of_first_five(void **state) {
+  QtbColumn *column;
+  PyObject *descriptor;
+  size_t size;
+
+  descriptor = new_descriptor("Level", "int");
+  column = qtb_column_new_succeeds();
+
+  qtb_column_init_succeeds(column, descriptor);
+  Py_DECREF(descriptor);
+
+  size = qtb_column_repr_longest_of_first_five(column);
+  assert_int_equal(11, size);  // strlen("Level (int)")
+
+  qtb_column_dealloc(column);
+  free(column);
+}
+
+static void test_qtb_column_repr_longest_of_first_five_malloc_fails(void **state) {
+  QtbColumn *column;
+  PyObject *descriptor;
+  size_t size;
+
+  descriptor = new_descriptor("Level", "int");
+  column = qtb_column_new_succeeds();
+
+  qtb_column_init_succeeds(column, descriptor);
+  Py_DECREF(descriptor);
+
+  column->malloc = &failing_malloc;
+  size = qtb_column_repr_longest_of_first_five(column);
+  assert_int_equal(-1, size);
+
+  qtb_column_dealloc(column);
+  free(column);
+}
+
+static void test_qtb_column_repr_longest_of_first_five_shorter_row(void **state) {
+  QtbColumn *column;
+  PyObject *descriptor;
+  PyObject *level;
+  size_t size;
+
+  level = PyLong_FromLongLong_succeeds(0);
+  descriptor = new_descriptor("Level", "int");
+  column = qtb_column_new_succeeds();
+
+  qtb_column_init_succeeds(column, descriptor);
+  Py_DECREF(descriptor);
+
+  qtb_column_append_succeeds(column, level);
+  Py_DECREF(level);
+
+  size = qtb_column_repr_longest_of_first_five(column);
+  assert_int_equal(11, size);  // strlen("Level (int)")
+
+  qtb_column_dealloc(column);
+  free(column);
+}
+
+static void test_qtb_column_repr_longest_of_first_five_longer_row(void **state) {
+  QtbColumn *column;
+  PyObject *descriptor;
+  PyObject *level;
+  size_t size;
+
+  level = PyLong_FromLongLong_succeeds(111111111111);
+  descriptor = new_descriptor("Level", "int");
+  column = qtb_column_new_succeeds();
+
+  qtb_column_init_succeeds(column, descriptor);
+  Py_DECREF(descriptor);
+
+  qtb_column_append_succeeds(column, level);
+  Py_DECREF(level);
+
+  size = qtb_column_repr_longest_of_first_five(column);
+  assert_int_equal(12, size);  // strlen("111111111111")
+
+  qtb_column_dealloc(column);
+  free(column);
+}
+
+static void test_qtb_column_repr_longest_of_first_five_fifth_longer_row(void **state) {
+  QtbColumn *column;
+  PyObject *descriptor;
+  PyObject *level;
+  size_t size;
+
+  level = PyLong_FromLongLong_succeeds(0);
+  descriptor = new_descriptor("Level", "int");
+  column = qtb_column_new_succeeds();
+
+  qtb_column_init_succeeds(column, descriptor);
+  Py_DECREF(descriptor);
+
+  for (size_t i = 0; i < 4; i++)
+    qtb_column_append_succeeds(column, level);
+  Py_DECREF(level);
+
+  level = PyLong_FromLongLong_succeeds(111111111111);
+  qtb_column_append_succeeds(column, level);
+  Py_DECREF(level);
+
+  size = qtb_column_repr_longest_of_first_five(column);
+  assert_int_equal(12, size);  // strlen("111111111111")
+
+  qtb_column_dealloc(column);
+  free(column);
+}
+
+static void test_qtb_column_repr_longest_of_first_five_sixth_ignored(void **state) {
+  QtbColumn *column;
+  PyObject *descriptor;
+  PyObject *level;
+  size_t size;
+
+  level = PyLong_FromLongLong_succeeds(0);
+  descriptor = new_descriptor("Level", "int");
+  column = qtb_column_new_succeeds();
+
+  qtb_column_init_succeeds(column, descriptor);
+  Py_DECREF(descriptor);
+
+  for (size_t i = 0; i < 5; i++)
+    qtb_column_append_succeeds(column, level);
+  Py_DECREF(level);
+
+  level = PyLong_FromLongLong_succeeds(111111111111);
+  qtb_column_append_succeeds(column, level);
+  Py_DECREF(level);
+
+  size = qtb_column_repr_longest_of_first_five(column);
+  assert_int_equal(11, size);  // strlen("Level (int)")
+
+  qtb_column_dealloc(column);
+  free(column);
+}
+
 static const struct CMUnitTest tests[] = {
   cmocka_unit_test(test_qtb_column_new_fails),
   cmocka_unit_test(test_qtb_column_new_many_fails),
@@ -156,6 +295,13 @@ static const struct CMUnitTest tests[] = {
   cmocka_unit_test_setup_teardown(test_qtb_column_init_descriptor_not_sequence, setup, teardown),
   cmocka_unit_test_setup_teardown(test_qtb_column_init_strdup_fails, setup, teardown),
   cmocka_unit_test_setup_teardown(test_qtb_column_init_free_on_fail, setup, teardown),
+
+  cmocka_unit_test_setup_teardown(test_qtb_column_repr_longest_of_first_five, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_repr_longest_of_first_five_malloc_fails, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_repr_longest_of_first_five_shorter_row, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_repr_longest_of_first_five_longer_row, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_repr_longest_of_first_five_fifth_longer_row, setup, teardown),
+  cmocka_unit_test_setup_teardown(test_qtb_column_repr_longest_of_first_five_sixth_ignored, setup, teardown),
 };
 
 int test_column_run() {

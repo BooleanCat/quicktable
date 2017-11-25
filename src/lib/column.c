@@ -375,3 +375,26 @@ char *qtb_column_header_repr(QtbColumn *column) {
 char *qtb_column_cell_repr(QtbColumn *column, size_t i) {
   return column->cell_repr(column, i);
 }
+
+int qtb_column_repr_longest_of_first_five(QtbColumn *column) {
+  char *repr;
+  int size;
+
+  repr = qtb_column_header_repr(column);
+  if (repr == NULL)
+    return -1;
+
+  size = strlen(repr);
+  free(repr);
+
+  for (size_t i = 0; i < MIN(column->size, 5); i++) {
+    repr = qtb_column_cell_repr(column, i);
+    if (repr == NULL)
+      return -1;
+
+    size = MAX((int)strlen(repr), size);
+    free(repr);
+  }
+
+  return size;
+}
