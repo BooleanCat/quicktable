@@ -161,41 +161,112 @@ static PyGetSetDef qtb_table_getsetters[] = {
   {NULL}
 };
 
-static PyObject *qtb_table_tp_repr(QtbTable *self) {
-  char *header_repr;
-  size_t size;
-  size_t offset;
-  char *repr_str;
-  PyObject *repr;
+static int *qtb_table_repr_get_column_widths(QtbTable *self) {
+  int *col_repr_widths;
 
-  size = 0;
-  offset = 0;
-
-  for (size_t i = 0; i < (size_t)self->width; i++) {
-    header_repr = qtb_column_header_repr(&self->columns[i]);
-    size += 3 + strlen(header_repr);
-    free(header_repr);
-  }
-
-  repr_str = (char *)calloc(size + 2, sizeof(char));
-  if (repr_str == NULL) {
-    PyErr_SetString(PyExc_MemoryError, "Oops.");
+  col_repr_widths = (int *)malloc(self->width * sizeof(int));
+  if (col_repr_widths == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "could not allocate memory");
     return NULL;
   }
 
   for (size_t i = 0; i < (size_t)self->width; i++) {
-    header_repr = qtb_column_header_repr(&self->columns[i]);
-    offset += snprintf(&repr_str[offset], 4 + strlen(header_repr), "| %s ", header_repr);
-    free(header_repr);
+    col_repr_widths[i] = qtb_column_repr_longest_of_first_five(&self->columns[i]);
+    if (col_repr_widths[i] == -1) {
+      free(col_repr_widths);
+      return NULL;
+    }
   }
 
-  if (offset)
-    repr_str[offset] = '|';
+  return col_repr_widths;
+}
 
-  repr = PyUnicode_FromString(repr_str);
-  free(repr_str);
+static char *qtb_table_repr_init(QtbTable *self, int *col_repr_widths) {
+  size_t row_size = 2;
+  char *repr;
+
+  for (size_t i = 0; i < (size_t)self->width; i++)
+    row_size += col_repr_widths[i] + 3;
+
+  repr = (char *)malloc(row_size * (1 + MIN(self->size, 5)) * sizeof(char));
+  if (repr == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "could not allocate memory");
+    return NULL;
+  }
+
+  repr[0] = '\0';
 
   return repr;
+}
+
+static char *qtb_table_repr_formatted_cell(const char *repr) {
+  char *formatted;
+  size_t size;
+
+  size = 3 + strlen(repr);
+
+  formatted = (char *)malloc(1 + size * sizeof(char));
+  if (formatted == NULL) {
+    PyErr_SetString(PyExc_MemoryError, "could not allocate memory");
+    return NULL;
+  }
+
+  if (sprintf(formatted, "| %s ", repr) != (int)size) {
+    PyErr_SetString(PyExc_RuntimeError, "could not write format string");
+    free(formatted);
+    return NULL;
+  }
+
+  return formatted;
+}
+
+static bool qtb_table_repr_cat_header(QtbTable *self, char *repr) {
+  char *cell_repr;
+  char *cell_repr_formatted;
+
+  for (size_t i = 0; i < (size_t)self->width; i++) {
+    cell_repr = qtb_column_header_repr(&self->columns[i]);
+    if (cell_repr == NULL)
+      return false;
+
+    cell_repr_formatted = qtb_table_repr_formatted_cell(cell_repr);
+    free(cell_repr);
+    if (cell_repr_formatted == NULL)
+      return false;
+
+    strcat(repr, cell_repr_formatted);
+    free(cell_repr_formatted);
+  }
+
+  strcat(repr, "|");
+  return true;
+}
+
+static PyObject *qtb_table_tp_repr(QtbTable *self) {
+  int *col_repr_widths;
+  char *repr;
+  PyObject *repr_py;
+
+  if (self->width == 0)
+    return PyUnicode_FromString("");
+
+  col_repr_widths = qtb_table_repr_get_column_widths(self);
+  if (col_repr_widths == NULL)
+    return NULL;
+
+  repr = qtb_table_repr_init(self, col_repr_widths);
+  free(col_repr_widths);
+  if (repr == NULL)
+    return NULL;
+
+  if (!qtb_table_repr_cat_header(self, repr)) {
+    free(repr);
+    return NULL;
+  }
+
+  repr_py = PyUnicode_FromString(repr);
+  free(repr);
+  return repr_py;
 }
 
 PyTypeObject QtbTableType = {
