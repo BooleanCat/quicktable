@@ -8,5 +8,6 @@ int main(void) {
     test_append_run()
     || test_column_run()
     || test_print_run()
+    || test_result_run()
   );
 }
