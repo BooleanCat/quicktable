@@ -4,6 +4,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include "column.h"
+#include "result.h"
 
 static char *copy_exception_string(void) {
   PyObject *exc_value;
@@ -93,7 +94,7 @@ QtbColumn *qtb_column_new_succeeds() {
 }
 
 void qtb_column_append_succeeds(QtbColumn *column, PyObject *item) {
-  assert_true(qtb_column_append(column, item));
+  assert_true(QtbResultSuccessful(qtb_column_append(column, item)));
 }
 
 PyObject *new_descriptor(const char *name, const char *type) {

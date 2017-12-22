@@ -13,9 +13,16 @@ QtbResultError package_py_err(void) {
 }
 
 void unpackage_py_err(QtbResultError error) {
-  PyErr_Restore(
-    error.value.stored.exc_value,
-    error.value.stored.exc_type,
-    error.value.stored.exc_traceback
-  );
+  switch (error.type) {
+    case QTB_RESULT_ERROR_STORED:
+      PyErr_Restore(
+        error.value.stored.exc_value,
+        error.value.stored.exc_type,
+        error.value.stored.exc_traceback
+      );
+      break;
+    case QTB_RESULT_ERROR_NEW:
+      PyErr_SetString(error.value.new.py_err_class, error.value.new.message);
+      break;
+  }
 }

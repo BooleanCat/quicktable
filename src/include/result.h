@@ -54,6 +54,7 @@ void unpackage_py_err(QtbResultError);
 })
 #define QtbResultRegisterFailureFromPyErr(type) ((type){QTB_RESULT_FAILURE, .value.error=package_py_err()})
 #define QtbResultFailureRaise(result) unpackage_py_err(result.value.error)
+#define QtbResultFailureMessage(result) (result.value.error.value.new.message)
 
 // ===== empty result =====
 
@@ -85,8 +86,6 @@ typedef struct {
 #define QtbResultSize_tSuccess(value) QtbResultRegisterSuccess(QtbResultSize_t, value)
 #define QtbResultSize_tFailure(py_err, message) QtbResultRegisterFailure(QtbResultSize_t, py_err, message)
 #define QtbResultSize_tFailureFromPyErr() QtbResultRegisterFailureFromPyErr(QtbResultSize_t)
-
-#endif
 
 // ===== int result =====
 
@@ -135,3 +134,5 @@ typedef struct {
 #define QtbResultPyObjectPtrSuccess(value) QtbResultRegisterSuccess(QtbResultPyObjectPtr, value)
 #define QtbResultPyObjectPtrFailure(py_err, message) QtbResultRegisterFailure(QtbResultPyObjectPtr, py_err, message)
 #define QtbResultPyObjectPtrFailureFromPyErr() QtbResultRegisterFailureFromPyErr(QtbResultPyObjectPtr)
+
+#endif

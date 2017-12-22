@@ -262,6 +262,17 @@ static void test_qtb_result_pyobject_ptr_failure_raise(void **state) {
   assert_non_null(PyErr_Occurred());
 }
 
+static void test_qtb_result_failure_raise_from_new(void **state) {
+  QtbResult result;
+
+  result = QtbResultFailure(PyExc_TypeError, "Wrong type, friend.");
+  QtbResultFailureRaise(result);
+
+  assert_non_null(PyErr_Occurred());
+  assert_exc_string_equal("Wrong type, friend.");
+  PyErr_Clear();
+}
+
 #define register_test(test) cmocka_unit_test_setup_teardown(test, setup, teardown)
 
 static const struct CMUnitTest tests[] = {
@@ -289,6 +300,8 @@ static const struct CMUnitTest tests[] = {
     register_test(test_qtb_result_pyobject_ptr_failure),
     register_test(test_qtb_result_pyobject_ptr_failure_from_py_err),
     register_test(test_qtb_result_pyobject_ptr_failure_raise),
+
+    register_test(test_qtb_result_failure_raise_from_new),
 };
 
 int test_result_run() {

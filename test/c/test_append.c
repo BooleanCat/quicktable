@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include "result.h"
 
 static int setup(void **state) {
   PyGILState_STATE *gstate;
@@ -31,7 +32,7 @@ static void test_qtb_column_append(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *name;
-  bool success;
+  QtbResult result;
 
   descriptor = new_descriptor("Name", "str");
   name = PyUnicode_FromString_succeeds("Pikachu");
@@ -39,10 +40,10 @@ static void test_qtb_column_append(void **state) {
   qtb_column_init_succeeds(column, descriptor);
   Py_DECREF(descriptor);
 
-  success = qtb_column_append(column, name);
+  result = qtb_column_append(column, name);
   Py_DECREF(name);
 
-  assert_true(success);
+  assert_true(QtbResultSuccessful(result));
   assert_int_equal(column->size, 1);
   assert_string_equal("Pikachu", column->data[0].s);
 
@@ -54,7 +55,7 @@ static void test_qtb_column_append_str_strdup_fails(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *name;
-  bool success;
+  QtbResult result;
 
   column = qtb_column_new_succeeds();
   descriptor = new_descriptor("Name", "str");
@@ -64,11 +65,11 @@ static void test_qtb_column_append_str_strdup_fails(void **state) {
   Py_DECREF(descriptor);
   column->strdup = &failing_strdup;
 
-  success = qtb_column_append(column, name);
+  result = qtb_column_append(column, name);
   Py_DECREF(name);
 
-  assert_false(success);
-  assert_exc_string_equal("could not create PyUnicodeobject");
+  assert_true(QtbResultFailed(result));
+  assert_string_equal("could not create PyUnicodeobject", QtbResultFailureMessage(result));
   assert_int_equal(column->size, 0);
 
   qtb_column_dealloc(column);
@@ -79,7 +80,7 @@ static void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *name;
-  bool success;
+  QtbResult result;
 
   column = qtb_column_new_succeeds();
   descriptor = new_descriptor("Name", "str");
@@ -88,8 +89,9 @@ static void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
   Py_DECREF(descriptor);
   column->PyUnicode_AsUTF8 = &failing_PyUnicode_AsUTF8;
 
-  success = qtb_column_append(column, name);
-  assert_false(success);
+  result = qtb_column_append(column, name);
+  assert_true(QtbResultFailed(result));
+  QtbResultFailureRaise(result);
   assert_exc_string_equal("PyUnicode_AsUTF8 failed");
   assert_int_equal(column->size, 0);
 
@@ -102,7 +104,7 @@ static void test_qtb_column_append_grow_fails(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *name;
-  bool success;
+  QtbResult result;
 
   column = qtb_column_new_succeeds();
   descriptor = new_descriptor("Name", "str");
@@ -114,10 +116,10 @@ static void test_qtb_column_append_grow_fails(void **state) {
   for (size_t i = 0; i < QTB_COLUMN_INITIAL_CAPACITY; i++)
     qtb_column_append_succeeds(column, name);
 
-  success = qtb_column_append(column, name);
-  assert_false(success);
+  result = qtb_column_append(column, name);
+  assert_true(QtbResultFailed(result));
   assert_int_equal(column->size, QTB_COLUMN_INITIAL_CAPACITY);
-  assert_exc_string_equal("failed to growth column");
+  assert_string_equal("failed to grow column", QtbResultFailureMessage(result));
 
   Py_DECREF(name);
   qtb_column_dealloc(column);
