@@ -94,7 +94,7 @@ QtbColumn *qtb_column_new_succeeds() {
 }
 
 void qtb_column_append_succeeds(QtbColumn *column, PyObject *item) {
-  assert_true(QtbResultSuccessful(qtb_column_append(column, item)));
+  assert_true(ResultSuccessful(qtb_column_append(column, item)));
 }
 
 PyObject *new_descriptor(const char *name, const char *type) {

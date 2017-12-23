@@ -87,7 +87,7 @@ static PySequenceMethods qtb_table_as_sequence = {
 
 static PyObject *qtb_table_append(QtbTable *self, PyObject *row) {
   PyObject *fast_row;
-  QtbResult result = QtbResultSuccess;
+  Result result = ResultSuccess;
 
   if (PySequence_Check(row) != 1) {
     PyErr_SetString(PyExc_TypeError, "append with non-sequence");
@@ -107,14 +107,14 @@ static PyObject *qtb_table_append(QtbTable *self, PyObject *row) {
 
   for (Py_ssize_t i = 0; i < self->width; i++) {
     result = qtb_column_append(&self->columns[i], PySequence_Fast_GET_ITEM(fast_row, i));
-    if (QtbResultFailed(result))
+    if (ResultFailed(result))
       break;
   }
 
   Py_DECREF(fast_row);
 
-  if (QtbResultFailed(result)) {
-    QtbResultFailureRaise(result);
+  if (ResultFailed(result)) {
+    ResultFailureRaise(result);
     return NULL;
   }
 

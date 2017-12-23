@@ -28,33 +28,33 @@ static int teardown(void **state) {
   return 0;
 }
 
-static void test_qtb_result_success(void **state) {
-  QtbResult result;
+static void test_result_success(void **state) {
+  Result result;
 
-  result = QtbResultSuccess;
+  result = ResultSuccess;
 
-  assert_true(QtbResultSuccessful(result));
-  assert_false(QtbResultFailed(result));
+  assert_true(ResultSuccessful(result));
+  assert_false(ResultFailed(result));
 }
 
-static void test_qtb_result_failure(void **state) {
-  QtbResult result;
+static void test_result_failure(void **state) {
+  Result result;
 
-  result = QtbResultFailure(PyExc_RuntimeError, "I failed");
+  result = ResultFailure(PyExc_RuntimeError, "I failed");
 
-  assert_true(QtbResultFailed(result));
-  assert_false(QtbResultSuccessful(result));
+  assert_true(ResultFailed(result));
+  assert_false(ResultSuccessful(result));
 }
 
-static void test_qtb_result_failure_from_py_err(void **state) {
-  QtbResult result;
+static void test_result_failure_from_py_err(void **state) {
+  Result result;
 
   PyErr_SetString(PyExc_RuntimeError, "Something is very wrong.");
-  result = QtbResultFailureFromPyErr();
+  result = ResultFailureFromPyErr();
 
   assert_null(PyErr_Occurred());
-  assert_true(QtbResultFailed(result));
-  assert_int_equal(QTB_RESULT_ERROR_STORED, result.value.error.type);
+  assert_true(ResultFailed(result));
+  assert_int_equal(RESULT_ERROR_STORED, result.value.error.type);
 
   PyErr_Restore(
     result.value.error.value.stored.exc_value,
@@ -64,43 +64,43 @@ static void test_qtb_result_failure_from_py_err(void **state) {
   PyErr_Clear();
 }
 
-static void test_qtb_result_failure_raise(void **state) {
-  QtbResult result;
+static void test_result_failure_raise(void **state) {
+  Result result;
 
   PyErr_SetString(PyExc_MemoryError, "No memory!");
-  result = QtbResultFailureFromPyErr();
-  QtbResultFailureRaise(result);
+  result = ResultFailureFromPyErr();
+  ResultFailureRaise(result);
 
   assert_non_null(PyErr_Occurred());
 }
 
-static void test_qtb_result_size_t_success(void **state) {
-  QtbResultSize_t result;
+static void test_result_size_t_success(void **state) {
+  ResultSize_t result;
 
-  result = QtbResultSize_tSuccess(14);
+  result = ResultSize_tSuccess(14);
 
-  assert_true(QtbResultSuccessful(result));
-  assert_int_equal(14, QtbResultValue(result));
+  assert_true(ResultSuccessful(result));
+  assert_int_equal(14, ResultValue(result));
 }
 
-static void test_qtb_result_size_t_failure(void **state) {
-  QtbResultSize_t result;
+static void test_result_size_t_failure(void **state) {
+  ResultSize_t result;
 
-  result = QtbResultSize_tFailure(PyExc_RuntimeError, "I failed");
+  result = ResultSize_tFailure(PyExc_RuntimeError, "I failed");
 
-  assert_true(QtbResultFailed(result));
+  assert_true(ResultFailed(result));
   assert_string_equal("I failed", result.value.error.value.new.message);
 }
 
-static void test_qtb_result_size_t_failure_from_py_err(void **state) {
-  QtbResultSize_t result;
+static void test_result_size_t_failure_from_py_err(void **state) {
+  ResultSize_t result;
 
   PyErr_SetString(PyExc_RuntimeError, "Something is very wrong.");
-  result = QtbResultSize_tFailureFromPyErr();
+  result = ResultSize_tFailureFromPyErr();
 
   assert_null(PyErr_Occurred());
-  assert_true(QtbResultFailed(result));
-  assert_int_equal(QTB_RESULT_ERROR_STORED, result.value.error.type);
+  assert_true(ResultFailed(result));
+  assert_int_equal(RESULT_ERROR_STORED, result.value.error.type);
 
   PyErr_Restore(
     result.value.error.value.stored.exc_value,
@@ -110,43 +110,43 @@ static void test_qtb_result_size_t_failure_from_py_err(void **state) {
   PyErr_Clear();
 }
 
-static void test_qtb_result_size_t_failure_raise(void **state) {
-  QtbResultSize_t result;
+static void test_result_size_t_failure_raise(void **state) {
+  ResultSize_t result;
 
   PyErr_SetString(PyExc_MemoryError, "No memory!");
-  result = QtbResultSize_tFailureFromPyErr();
-  QtbResultFailureRaise(result);
+  result = ResultSize_tFailureFromPyErr();
+  ResultFailureRaise(result);
 
   assert_non_null(PyErr_Occurred());
 }
 
-static void test_qtb_result_int_success(void **state) {
-  QtbResultInt result;
+static void test_result_int_success(void **state) {
+  ResultInt result;
 
-  result = QtbResultIntSuccess(14);
+  result = ResultIntSuccess(14);
 
-  assert_true(QtbResultSuccessful(result));
-  assert_int_equal(14, QtbResultValue(result));
+  assert_true(ResultSuccessful(result));
+  assert_int_equal(14, ResultValue(result));
 }
 
-static void test_qtb_result_int_failure(void **state) {
-  QtbResultInt result;
+static void test_result_int_failure(void **state) {
+  ResultInt result;
 
-  result = QtbResultIntFailure(PyExc_RuntimeError, "I failed");
+  result = ResultIntFailure(PyExc_RuntimeError, "I failed");
 
-  assert_true(QtbResultFailed(result));
+  assert_true(ResultFailed(result));
   assert_string_equal("I failed", result.value.error.value.new.message);
 }
 
-static void test_qtb_result_int_failure_from_py_err(void **state) {
-  QtbResultInt result;
+static void test_result_int_failure_from_py_err(void **state) {
+  ResultInt result;
 
   PyErr_SetString(PyExc_MemoryError, "Huh...");
-  result = QtbResultIntFailureFromPyErr();
+  result = ResultIntFailureFromPyErr();
 
   assert_null(PyErr_Occurred());
-  assert_true(QtbResultFailed(result));
-  assert_int_equal(QTB_RESULT_ERROR_STORED, result.value.error.type);
+  assert_true(ResultFailed(result));
+  assert_int_equal(RESULT_ERROR_STORED, result.value.error.type);
 
   PyErr_Restore(
     result.value.error.value.stored.exc_value,
@@ -156,43 +156,43 @@ static void test_qtb_result_int_failure_from_py_err(void **state) {
   PyErr_Clear();
 }
 
-static void test_qtb_result_int_failure_raise(void **state) {
-  QtbResultInt result;
+static void test_result_int_failure_raise(void **state) {
+  ResultInt result;
 
   PyErr_SetString(PyExc_MemoryError, "No memory!");
-  result = QtbResultIntFailureFromPyErr();
-  QtbResultFailureRaise(result);
+  result = ResultIntFailureFromPyErr();
+  ResultFailureRaise(result);
 
   assert_non_null(PyErr_Occurred());
 }
 
-static void test_qtb_result_char_ptr_success(void **state) {
-  QtbResultCharPtr result;
+static void test_result_char_ptr_success(void **state) {
+  ResultCharPtr result;
 
-  result = QtbResultCharPtrSuccess("Yay!");
+  result = ResultCharPtrSuccess("Yay!");
 
-  assert_true(QtbResultSuccessful(result));
-  assert_string_equal("Yay!", QtbResultValue(result));
+  assert_true(ResultSuccessful(result));
+  assert_string_equal("Yay!", ResultValue(result));
 }
 
-static void test_qtb_result_char_ptr_failure(void **state) {
-  QtbResultCharPtr result;
+static void test_result_char_ptr_failure(void **state) {
+  ResultCharPtr result;
 
-  result = QtbResultCharPtrFailure(PyExc_MemoryError, "Oh, no.");
+  result = ResultCharPtrFailure(PyExc_MemoryError, "Oh, no.");
 
-  assert_true(QtbResultFailed(result));
+  assert_true(ResultFailed(result));
   assert_string_equal("Oh, no.", result.value.error.value.new.message);
 }
 
-static void test_qtb_result_char_ptr_failure_from_py_err(void **state) {
-  QtbResultCharPtr result;
+static void test_result_char_ptr_failure_from_py_err(void **state) {
+  ResultCharPtr result;
 
   PyErr_SetString(PyExc_RuntimeError, "Something is very wrong.");
-  result = QtbResultCharPtrFailureFromPyErr();
+  result = ResultCharPtrFailureFromPyErr();
 
   assert_null(PyErr_Occurred());
-  assert_true(QtbResultFailed(result));
-  assert_int_equal(QTB_RESULT_ERROR_STORED, result.value.error.type);
+  assert_true(ResultFailed(result));
+  assert_int_equal(RESULT_ERROR_STORED, result.value.error.type);
 
   PyErr_Restore(
     result.value.error.value.stored.exc_value,
@@ -202,47 +202,47 @@ static void test_qtb_result_char_ptr_failure_from_py_err(void **state) {
   PyErr_Clear();
 }
 
-static void test_qtb_result_char_ptr_failure_raise(void **state) {
-  QtbResultCharPtr result;
+static void test_result_char_ptr_failure_raise(void **state) {
+  ResultCharPtr result;
 
   PyErr_SetString(PyExc_MemoryError, "No memory!");
-  result = QtbResultCharPtrFailureFromPyErr();
-  QtbResultFailureRaise(result);
+  result = ResultCharPtrFailureFromPyErr();
+  ResultFailureRaise(result);
 
   assert_non_null(PyErr_Occurred());
 }
 
-static void test_qtb_result_pyobject_ptr_success(void **state) {
-  QtbResultPyObjectPtr result;
+static void test_result_pyobject_ptr_success(void **state) {
+  ResultPyObjectPtr result;
   PyObject *four;
 
   four = PyLong_FromLongLong_succeeds(4);
-  result = QtbResultPyObjectPtrSuccess(four);
+  result = ResultPyObjectPtrSuccess(four);
 
-  assert_true(QtbResultSuccessful(result));
-  assert_int_equal(4, PyLong_AsLong(QtbResultValue(result)));
+  assert_true(ResultSuccessful(result));
+  assert_int_equal(4, PyLong_AsLong(ResultValue(result)));
 
   Py_DECREF(four);
 }
 
-static void test_qtb_result_pyobject_ptr_failure(void **state) {
-  QtbResultPyObjectPtr result;
+static void test_result_pyobject_ptr_failure(void **state) {
+  ResultPyObjectPtr result;
 
-  result = QtbResultPyObjectPtrFailure(PyExc_MemoryError, "Oh, no.");
+  result = ResultPyObjectPtrFailure(PyExc_MemoryError, "Oh, no.");
 
-  assert_true(QtbResultFailed(result));
+  assert_true(ResultFailed(result));
   assert_string_equal("Oh, no.", result.value.error.value.new.message);
 }
 
-static void test_qtb_result_pyobject_ptr_failure_from_py_err(void **state) {
-  QtbResultPyObjectPtr result;
+static void test_result_pyobject_ptr_failure_from_py_err(void **state) {
+  ResultPyObjectPtr result;
 
   PyErr_SetString(PyExc_RuntimeError, "Something is very wrong.");
-  result = QtbResultPyObjectPtrFailureFromPyErr();
+  result = ResultPyObjectPtrFailureFromPyErr();
 
   assert_null(PyErr_Occurred());
-  assert_true(QtbResultFailed(result));
-  assert_int_equal(QTB_RESULT_ERROR_STORED, result.value.error.type);
+  assert_true(ResultFailed(result));
+  assert_int_equal(RESULT_ERROR_STORED, result.value.error.type);
 
   PyErr_Restore(
     result.value.error.value.stored.exc_value,
@@ -252,21 +252,21 @@ static void test_qtb_result_pyobject_ptr_failure_from_py_err(void **state) {
   PyErr_Clear();
 }
 
-static void test_qtb_result_pyobject_ptr_failure_raise(void **state) {
-  QtbResultPyObjectPtr result;
+static void test_result_pyobject_ptr_failure_raise(void **state) {
+  ResultPyObjectPtr result;
 
   PyErr_SetString(PyExc_MemoryError, "No memory!");
-  result = QtbResultPyObjectPtrFailureFromPyErr();
-  QtbResultFailureRaise(result);
+  result = ResultPyObjectPtrFailureFromPyErr();
+  ResultFailureRaise(result);
 
   assert_non_null(PyErr_Occurred());
 }
 
-static void test_qtb_result_failure_raise_from_new(void **state) {
-  QtbResult result;
+static void test_result_failure_raise_from_new(void **state) {
+  Result result;
 
-  result = QtbResultFailure(PyExc_TypeError, "Wrong type, friend.");
-  QtbResultFailureRaise(result);
+  result = ResultFailure(PyExc_TypeError, "Wrong type, friend.");
+  ResultFailureRaise(result);
 
   assert_non_null(PyErr_Occurred());
   assert_exc_string_equal("Wrong type, friend.");
@@ -276,32 +276,32 @@ static void test_qtb_result_failure_raise_from_new(void **state) {
 #define register_test(test) cmocka_unit_test_setup_teardown(test, setup, teardown)
 
 static const struct CMUnitTest tests[] = {
-    register_test(test_qtb_result_success),
-    register_test(test_qtb_result_failure),
-    register_test(test_qtb_result_failure_from_py_err),
-    register_test(test_qtb_result_failure_raise),
+    register_test(test_result_success),
+    register_test(test_result_failure),
+    register_test(test_result_failure_from_py_err),
+    register_test(test_result_failure_raise),
 
-    register_test(test_qtb_result_size_t_success),
-    register_test(test_qtb_result_size_t_failure),
-    register_test(test_qtb_result_size_t_failure_from_py_err),
-    register_test(test_qtb_result_size_t_failure_raise),
+    register_test(test_result_size_t_success),
+    register_test(test_result_size_t_failure),
+    register_test(test_result_size_t_failure_from_py_err),
+    register_test(test_result_size_t_failure_raise),
 
-    register_test(test_qtb_result_int_success),
-    register_test(test_qtb_result_int_failure),
-    register_test(test_qtb_result_int_failure_from_py_err),
-    register_test(test_qtb_result_int_failure_raise),
+    register_test(test_result_int_success),
+    register_test(test_result_int_failure),
+    register_test(test_result_int_failure_from_py_err),
+    register_test(test_result_int_failure_raise),
 
-    register_test(test_qtb_result_char_ptr_success),
-    register_test(test_qtb_result_char_ptr_failure),
-    register_test(test_qtb_result_char_ptr_failure_from_py_err),
-    register_test(test_qtb_result_char_ptr_failure_raise),
+    register_test(test_result_char_ptr_success),
+    register_test(test_result_char_ptr_failure),
+    register_test(test_result_char_ptr_failure_from_py_err),
+    register_test(test_result_char_ptr_failure_raise),
 
-    register_test(test_qtb_result_pyobject_ptr_success),
-    register_test(test_qtb_result_pyobject_ptr_failure),
-    register_test(test_qtb_result_pyobject_ptr_failure_from_py_err),
-    register_test(test_qtb_result_pyobject_ptr_failure_raise),
+    register_test(test_result_pyobject_ptr_success),
+    register_test(test_result_pyobject_ptr_failure),
+    register_test(test_result_pyobject_ptr_failure_from_py_err),
+    register_test(test_result_pyobject_ptr_failure_raise),
 
-    register_test(test_qtb_result_failure_raise_from_new),
+    register_test(test_result_failure_raise_from_new),
 };
 
 int test_result_run() {

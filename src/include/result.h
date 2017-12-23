@@ -1,138 +1,138 @@
-#ifndef QTB_RESULT_H
-#define QTB_RESULT_H
+#ifndef RESULT_H
+#define RESULT_H
 
 #include <Python.h>
 
 typedef enum {
-  QTB_RESULT_SUCCESS,
-  QTB_RESULT_FAILURE,
-} QtbResultType;
+  RESULT_SUCCESS,
+  RESULT_FAILURE,
+} ResultType;
 
-#define QtbResult_HEAD \
-  QtbResultType type;
+#define Result_HEAD \
+  ResultType type;
 
-#define QtbResultSuccessful(result) (result.type == QTB_RESULT_SUCCESS)
-#define QtbResultFailed(result) (result.type == QTB_RESULT_FAILURE)
-#define QtbResultValue(result) (result.value.value)
+#define ResultSuccessful(result) (result.type == RESULT_SUCCESS)
+#define ResultFailed(result) (result.type == RESULT_FAILURE)
+#define ResultValue(result) (result.value.value)
 
 typedef enum {
-  QTB_RESULT_ERROR_NEW,
-  QTB_RESULT_ERROR_STORED,
-} QtbResultErrorType;
+  RESULT_ERROR_NEW,
+  RESULT_ERROR_STORED,
+} ResultErrorType;
 
 typedef struct {
   PyObject *py_err_class;
   const char *message;
-} QtbResultErrorNew;
+} ResultErrorNew;
 
 typedef struct {
   PyObject *exc_value;
   PyObject *exc_type;
   PyObject *exc_traceback;
-} QtbResultErrorStored;
+} ResultErrorStored;
 
 typedef union {
-  QtbResultErrorNew new;
-  QtbResultErrorStored stored;
-} QtbResultErrorValue;
+  ResultErrorNew new;
+  ResultErrorStored stored;
+} ResultErrorValue;
 
 typedef struct {
-  QtbResultErrorType type;
-  QtbResultErrorValue value;
-} QtbResultError;
+  ResultErrorType type;
+  ResultErrorValue value;
+} ResultError;
 
-QtbResultError package_py_err(void);
-void unpackage_py_err(QtbResultError);
+ResultError package_py_err(void);
+void unpackage_py_err(ResultError);
 
-#define QtbResultRegisterSuccess(type, value) ((type){QTB_RESULT_SUCCESS, {value}})
-#define QtbResultRegisterFailure(type, py_err, message) ((type){ \
-  QTB_RESULT_FAILURE, \
+#define ResultRegisterSuccess(type, value) ((type){RESULT_SUCCESS, {value}})
+#define ResultRegisterFailure(type, py_err, message) ((type){ \
+  RESULT_FAILURE, \
   .value.error={ \
-    QTB_RESULT_ERROR_NEW, \
+    RESULT_ERROR_NEW, \
     .value.new={py_err, message} \
   } \
 })
-#define QtbResultRegisterFailureFromPyErr(type) ((type){QTB_RESULT_FAILURE, .value.error=package_py_err()})
-#define QtbResultFailureRaise(result) unpackage_py_err(result.value.error)
-#define QtbResultFailureMessage(result) (result.value.error.value.new.message)
+#define ResultRegisterFailureFromPyErr(type) ((type){RESULT_FAILURE, .value.error=package_py_err()})
+#define ResultFailureRaise(result) unpackage_py_err(result.value.error)
+#define ResultFailureMessage(result) (result.value.error.value.new.message)
 
 // ===== empty result =====
 
 typedef union {
-  QtbResultError error;
-} QtbResultValue;
+  ResultError error;
+} ResultValue;
 
 typedef struct {
-  QtbResult_HEAD
-  QtbResultValue value;
-} QtbResult;
+  Result_HEAD
+  ResultValue value;
+} Result;
 
-#define QtbResultSuccess ((QtbResult){QTB_RESULT_SUCCESS})
-#define QtbResultFailure(py_err, message) QtbResultRegisterFailure(QtbResult, py_err, message)
-#define QtbResultFailureFromPyErr() QtbResultRegisterFailureFromPyErr(QtbResult)
+#define ResultSuccess ((Result){RESULT_SUCCESS})
+#define ResultFailure(py_err, message) ResultRegisterFailure(Result, py_err, message)
+#define ResultFailureFromPyErr() ResultRegisterFailureFromPyErr(Result)
 
 // ===== size_t result =====
 
 typedef union {
   size_t value;
-  QtbResultError error;
-} QtbResultSize_tValue;
+  ResultError error;
+} ResultSize_tValue;
 
 typedef struct {
-  QtbResult_HEAD
-  QtbResultSize_tValue value;
-} QtbResultSize_t;
+  Result_HEAD
+  ResultSize_tValue value;
+} ResultSize_t;
 
-#define QtbResultSize_tSuccess(value) QtbResultRegisterSuccess(QtbResultSize_t, value)
-#define QtbResultSize_tFailure(py_err, message) QtbResultRegisterFailure(QtbResultSize_t, py_err, message)
-#define QtbResultSize_tFailureFromPyErr() QtbResultRegisterFailureFromPyErr(QtbResultSize_t)
+#define ResultSize_tSuccess(value) ResultRegisterSuccess(ResultSize_t, value)
+#define ResultSize_tFailure(py_err, message) ResultRegisterFailure(ResultSize_t, py_err, message)
+#define ResultSize_tFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultSize_t)
 
 // ===== int result =====
 
 typedef union {
   int value;
-  QtbResultError error;
-} QtbResultIntValue;
+  ResultError error;
+} ResultIntValue;
 
 typedef struct {
-  QtbResult_HEAD
-  QtbResultIntValue value;
-} QtbResultInt;
+  Result_HEAD
+  ResultIntValue value;
+} ResultInt;
 
-#define QtbResultIntSuccess(value) QtbResultRegisterSuccess(QtbResultInt, value)
-#define QtbResultIntFailure(py_err, message) QtbResultRegisterFailure(QtbResultInt, py_err, message)
-#define QtbResultIntFailureFromPyErr() QtbResultRegisterFailureFromPyErr(QtbResultInt)
+#define ResultIntSuccess(value) ResultRegisterSuccess(ResultInt, value)
+#define ResultIntFailure(py_err, message) ResultRegisterFailure(ResultInt, py_err, message)
+#define ResultIntFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultInt)
 
 // ===== char *result =====
 
 typedef union {
   char *value;
-  QtbResultError error;
-} QtbResultCharPtrValue;
+  ResultError error;
+} ResultCharPtrValue;
 
 typedef struct {
-  QtbResult_HEAD
-  QtbResultCharPtrValue value;
-} QtbResultCharPtr;
+  Result_HEAD
+  ResultCharPtrValue value;
+} ResultCharPtr;
 
-#define QtbResultCharPtrSuccess(value) QtbResultRegisterSuccess(QtbResultCharPtr, value)
-#define QtbResultCharPtrFailure(py_err, message) QtbResultRegisterFailure(QtbResultCharPtr, py_err, message)
-#define QtbResultCharPtrFailureFromPyErr() QtbResultRegisterFailureFromPyErr(QtbResultCharPtr)
+#define ResultCharPtrSuccess(value) ResultRegisterSuccess(ResultCharPtr, value)
+#define ResultCharPtrFailure(py_err, message) ResultRegisterFailure(ResultCharPtr, py_err, message)
+#define ResultCharPtrFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultCharPtr)
 
 // ===== PyObject *result =====
 
 typedef union {
   PyObject *value;
-  QtbResultError error;
-} QtbResultPyObjectPtrValue;
+  ResultError error;
+} ResultPyObjectPtrValue;
 
 typedef struct {
-  QtbResult_HEAD
-  QtbResultPyObjectPtrValue value;
-} QtbResultPyObjectPtr;
+  Result_HEAD
+  ResultPyObjectPtrValue value;
+} ResultPyObjectPtr;
 
-#define QtbResultPyObjectPtrSuccess(value) QtbResultRegisterSuccess(QtbResultPyObjectPtr, value)
-#define QtbResultPyObjectPtrFailure(py_err, message) QtbResultRegisterFailure(QtbResultPyObjectPtr, py_err, message)
-#define QtbResultPyObjectPtrFailureFromPyErr() QtbResultRegisterFailureFromPyErr(QtbResultPyObjectPtr)
+#define ResultPyObjectPtrSuccess(value) ResultRegisterSuccess(ResultPyObjectPtr, value)
+#define ResultPyObjectPtrFailure(py_err, message) ResultRegisterFailure(ResultPyObjectPtr, py_err, message)
+#define ResultPyObjectPtrFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultPyObjectPtr)
 
 #endif
