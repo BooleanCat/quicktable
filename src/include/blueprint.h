@@ -1,9 +1,9 @@
-#ifndef QTAB_BLUEPRINT_H
-#define QTAB_BLUEPRINT_H
+#ifndef QTB_BLUEPRINT_H
+#define QTB_BLUEPRINT_H
 
-#include <stdbool.h>
 #include <Python.h>
+#include "result.h"
 
-bool qtb_validate_blueprint(PyObject *blueprint);
+Result qtb_validate_blueprint(PyObject *blueprint);
 
 #endif

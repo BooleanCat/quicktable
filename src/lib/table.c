@@ -25,12 +25,16 @@ static void qtb_table_dealloc(QtbTable *self) {
 
 static int qtb_table_init(QtbTable *self, PyObject *args, PyObject *kwargs) {
   PyObject *blueprint = NULL;
+  Result result;
 
   if (!PyArg_ParseTuple(args, "O", &blueprint))
     return -1;
 
-  if (qtb_validate_blueprint(blueprint) == false)
+  result = qtb_validate_blueprint(blueprint);
+  if (ResultFailed(result)) {
+    ResultFailureRaise(result);
     return -1;
+  }
 
   self->width = PySequence_Size(blueprint);
   if (self->width == -1)

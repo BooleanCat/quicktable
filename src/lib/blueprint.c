@@ -1,4 +1,6 @@
 #include "blueprint.h"
+#include "result.h"
+#include <stdbool.h>
 
 static const char *qtb_valid_column_types[] = {
   "str",
@@ -7,20 +9,20 @@ static const char *qtb_valid_column_types[] = {
   "float",
 };
 
-static bool qtb_validate_column_name(PyObject *descriptor) {
+static Result qtb_validate_column_name(PyObject *descriptor) {
   PyObject *name;
-  bool valid = true;
+  int name_check;
 
   if ((name = PySequence_ITEM(descriptor, 0)) == NULL)
-    return false;
+    return ResultFailureFromPyErr();
 
-  if (PyUnicode_Check(name) == 0) {
-    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
-    valid = false;
-  }
-
+  name_check = PyUnicode_Check(name);
   Py_DECREF(name);
-  return valid;
+
+  if (name_check == 0)
+    return ResultFailure(PyExc_TypeError, "invalid blueprint");
+
+  return ResultSuccess;
 }
 
 static bool qtb_valid_column_types_contains(PyObject *type) {
@@ -36,64 +38,68 @@ static bool qtb_valid_column_types_contains(PyObject *type) {
   return contained;
 }
 
-static bool qtb_validate_column_type(PyObject *descriptor) {
+static Result qtb_validate_column_type(PyObject *descriptor) {
   PyObject *type;
-  bool valid = true;
+  bool contains;
+  int type_check;
 
   if ((type = PySequence_ITEM(descriptor, 1)) == NULL)
-    return false;
+    return ResultFailureFromPyErr();
 
-  if (PyUnicode_Check(type) == 0 || !qtb_valid_column_types_contains(type)) {
-    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
-    valid = false;
+  type_check = PyUnicode_Check(type);
+  if (type_check == 0) {
+    Py_DECREF(type);
+    return ResultFailure(PyExc_TypeError, "invalid blueprint");
   }
 
+  contains = qtb_valid_column_types_contains(type);
   Py_DECREF(type);
-  return valid;
+  if (!contains)
+    return ResultFailure(PyExc_TypeError, "invalid blueprint");
+
+  return ResultSuccess;
 }
 
-static bool qtb_validate_descriptor(PyObject *descriptor) {
+static Result qtb_validate_descriptor(PyObject *descriptor) {
   Py_ssize_t len;
+  Result result;
 
-  if (PySequence_Check(descriptor) != 1) {
-    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
-    return false;
-  }
+  if (PySequence_Check(descriptor) != 1)
+    return ResultFailure(PyExc_TypeError, "invalid blueprint");
 
   if ((len = PySequence_Size(descriptor)) == -1)
-    return false;
+    return ResultFailure(PyExc_TypeError, "invalid blueprint");
 
-  if (len != 2) {
-    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
-    return false;
-  }
+  if (len != 2)
+    return ResultFailure(PyExc_TypeError, "invalid blueprint");
 
-  if (qtb_validate_column_name(descriptor) == false)
-    return false;
+  result = qtb_validate_column_name(descriptor);
+  if (ResultFailed(result))
+    return result;
 
   return qtb_validate_column_type(descriptor);
 }
 
-bool qtb_validate_blueprint(PyObject *blueprint) {
+Result qtb_validate_blueprint(PyObject *blueprint) {
   Py_ssize_t len;
   PyObject *fast_blueprint;
-  bool valid_descriptor = true;
+  Result result;
 
-  if ((len = PySequence_Size(blueprint)) == -1) {
-    PyErr_SetString(PyExc_TypeError, "invalid blueprint");
-    return false;
-  }
+  if ((len = PySequence_Size(blueprint)) == -1)
+    return ResultFailure(PyExc_TypeError, "invalid blueprint");
 
   fast_blueprint = PySequence_Fast(blueprint, "invalid blueprint");
   if (fast_blueprint == NULL)
-    return false;
+    return ResultFailureFromPyErr();
 
   for (Py_ssize_t i = 0; i < len; i++) {
-    valid_descriptor = qtb_validate_descriptor(PySequence_Fast_GET_ITEM(fast_blueprint, i));
-    if (valid_descriptor == false)
-      break;
+    result = qtb_validate_descriptor(PySequence_Fast_GET_ITEM(fast_blueprint, i));
+    if (ResultFailed(result)) {
+      Py_DECREF(fast_blueprint);
+      return result;
+    }
   }
 
   Py_DECREF(fast_blueprint);
-  return valid_descriptor;
+  return ResultSuccess;
 }
