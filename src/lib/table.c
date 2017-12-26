@@ -232,14 +232,16 @@ static ResultCharPtr qtb_table_repr_formatted_cell(const char *repr) {
   return ResultCharPtrSuccess(formatted);
 }
 
-static Result qtb_table_repr_cat_header(QtbTable *self, char *repr) {
+static Result qtb_table_repr_cat_header(QtbTable *self, char *repr, size_t *paddings) {
   ResultCharPtr header_result;
   ResultCharPtr formatted_result;
+  size_t header_len;
 
   for (size_t i = 0; i < (size_t)self->width; i++) {
     header_result = qtb_column_header_repr(&self->columns[i]);
     if (ResultFailed(header_result))
       return ResultFailureFromResult(header_result);
+    header_len = strlen(ResultValue(header_result));
 
     formatted_result = qtb_table_repr_formatted_cell(ResultValue(header_result));
     free(ResultValue(header_result));
@@ -247,6 +249,40 @@ static Result qtb_table_repr_cat_header(QtbTable *self, char *repr) {
       return ResultFailureFromResult(formatted_result);
 
     strcat(repr, ResultValue(formatted_result));
+
+    for (size_t j = 0; j < paddings[i] - header_len; j++)
+      strcat(repr, " ");
+
+    free(ResultValue(formatted_result));
+  }
+
+  strcat(repr, "|");
+  return ResultSuccess;
+}
+
+static Result qtb_table_repr_cat_row(QtbTable *self, size_t row, char *repr, size_t *paddings) {
+  ResultCharPtr cell_result;
+  ResultCharPtr formatted_result;
+  size_t cell_len;
+
+  strcat(repr, "\n");
+
+  for (size_t i = 0; i < (size_t)self->width; i++) {
+    cell_result = qtb_column_cell_repr(&self->columns[i], row);
+    if (ResultFailed(cell_result))
+      return ResultFailureFromResult(cell_result);
+    cell_len = strlen(ResultValue(cell_result));
+
+    formatted_result = qtb_table_repr_formatted_cell(ResultValue(cell_result));
+    free(ResultValue(cell_result));
+    if (ResultFailed(formatted_result))
+      return ResultFailureFromResult(formatted_result);
+
+    strcat(repr, ResultValue(formatted_result));
+
+    for (size_t j = 0; j < paddings[i] - cell_len; j++)
+      strcat(repr, " ");
+
     free(ResultValue(formatted_result));
   }
 
@@ -270,18 +306,27 @@ static PyObject *qtb_table_tp_repr(QtbTable *self) {
   }
 
   repr_result = qtb_table_repr_init(self, ResultValue(widths_result));
-  free(ResultValue(widths_result));
   if (ResultFailed(repr_result)) {
     ResultFailureRaise(repr_result);
     return NULL;
   }
 
-  cat_result = qtb_table_repr_cat_header(self, ResultValue(repr_result));
+  cat_result = qtb_table_repr_cat_header(self, ResultValue(repr_result), ResultValue(widths_result));
   if (ResultFailed(cat_result)) {
     free(ResultValue(repr_result));
     ResultFailureRaise(cat_result);
     return NULL;
   }
+
+  for (Py_ssize_t i = 0; i < MIN(self->size, 5); i++) {
+    cat_result = qtb_table_repr_cat_row(self, (size_t)i, ResultValue(repr_result), ResultValue(widths_result));
+    if (ResultFailed(cat_result)) {
+      free(ResultValue(repr_result));
+      ResultFailureRaise(cat_result);
+      return NULL;
+    }
+  }
+  free(ResultValue(widths_result));
 
   repr_py = PyUnicode_FromString(ResultValue(repr_result));
   free(ResultValue(repr_result));
