@@ -81,7 +81,7 @@ PyObject *PyBool_FromLong_succeeds(long n) {
 }
 
 void qtb_column_init_succeeds(QtbColumn *column, PyObject *descriptor) {
-  assert_true(qtb_column_init(column, descriptor));
+  assert_true(ResultSuccessful(qtb_column_init(column, descriptor)));
 }
 
 QtbColumn *qtb_column_new_succeeds() {

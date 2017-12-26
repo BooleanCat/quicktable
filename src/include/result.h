@@ -53,6 +53,7 @@ void unpackage_py_err(ResultError);
   } \
 })
 #define ResultRegisterFailureFromPyErr(type) ((type){RESULT_FAILURE, .value.error=package_py_err()})
+#define ResultRegisterFailureFromResult(type, result) ((type){RESULT_FAILURE, .value.error=result.value.error})
 #define ResultFailureRaise(result) unpackage_py_err(result.value.error)
 #define ResultFailureMessage(result) (result.value.error.value.new.message)
 
@@ -70,6 +71,7 @@ typedef struct {
 #define ResultSuccess ((Result){RESULT_SUCCESS})
 #define ResultFailure(py_err, message) ResultRegisterFailure(Result, py_err, message)
 #define ResultFailureFromPyErr() ResultRegisterFailureFromPyErr(Result)
+#define ResultFailureFromResult(result) ResultRegisterFailureFromResult(Result, result)
 
 // ===== size_t result =====
 
@@ -86,6 +88,24 @@ typedef struct {
 #define ResultSize_tSuccess(value) ResultRegisterSuccess(ResultSize_t, value)
 #define ResultSize_tFailure(py_err, message) ResultRegisterFailure(ResultSize_t, py_err, message)
 #define ResultSize_tFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultSize_t)
+#define ResultSize_tFailureFromResult(result) ResultRegisterFailureFromResult(ResultSize_t, result)
+
+// ===== size_t *result =====
+
+typedef union {
+  size_t *value;
+  ResultError error;
+} ResultSize_tPtrValue;
+
+typedef struct {
+  Result_HEAD
+  ResultSize_tPtrValue value;
+} ResultSize_tPtr;
+
+#define ResultSize_tPtrSuccess(value) ResultRegisterSuccess(ResultSize_tPtr, value)
+#define ResultSize_tPtrFailure(py_err, message) ResultRegisterFailure(ResultSize_tPtr, py_err, message)
+#define ResultSize_tPtrFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultSize_tPtr)
+#define ResultSize_tPtrFailureFromResult(result) ResultRegisterFailureFromResult(ResultSize_tPtr, result)
 
 // ===== int result =====
 
@@ -102,6 +122,7 @@ typedef struct {
 #define ResultIntSuccess(value) ResultRegisterSuccess(ResultInt, value)
 #define ResultIntFailure(py_err, message) ResultRegisterFailure(ResultInt, py_err, message)
 #define ResultIntFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultInt)
+#define ResultIntFailureFromResult(result) ResultRegisterFailureFromResult(ResultInt, result)
 
 // ===== char *result =====
 
@@ -118,6 +139,7 @@ typedef struct {
 #define ResultCharPtrSuccess(value) ResultRegisterSuccess(ResultCharPtr, value)
 #define ResultCharPtrFailure(py_err, message) ResultRegisterFailure(ResultCharPtr, py_err, message)
 #define ResultCharPtrFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultCharPtr)
+#define ResultCharPtrFailureFromResult(result) ResultRegisterFailureFromResult(ResultCharPtr, result)
 
 // ===== PyObject *result =====
 
@@ -134,5 +156,6 @@ typedef struct {
 #define ResultPyObjectPtrSuccess(value) ResultRegisterSuccess(ResultPyObjectPtr, value)
 #define ResultPyObjectPtrFailure(py_err, message) ResultRegisterFailure(ResultPyObjectPtr, py_err, message)
 #define ResultPyObjectPtrFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultPyObjectPtr)
+#define ResultPyObjectPtrFailureFromResult(result) ResultRegisterFailureFromResult(ResultPyObjectPtr, result)
 
 #endif

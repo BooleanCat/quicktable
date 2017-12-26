@@ -97,59 +97,60 @@ static void test_qtb_column_init_does_not_change_type_refcount(void **state) {
 
 static void test_qtb_column_init_descriptor_not_sequence(void **state) {
   QtbColumn *column;
-  bool result;
+  Result result;
 
   column = qtb_column_new_succeeds();
 
   result = qtb_column_init(column, Py_None);
+  assert_true(ResultFailed(result));
+  ResultFailureRaise(result);
+  assert_exc_string_equal("descriptor not a sequence");
+
   qtb_column_dealloc(column);
   free(column);
-
-  assert_false(result);
-  assert_exc_string_equal("descriptor not a sequence");
 }
 
 static void test_qtb_column_init_strdup_fails(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
-  bool success;
+  Result result;
 
   column = qtb_column_new_succeeds();
   column->strdup = &failing_strdup;
 
   descriptor = new_descriptor("Name", "str");
 
-  success = qtb_column_init(column, descriptor);
+  result = qtb_column_init(column, descriptor);
+  assert_true(ResultFailed(result));
+  assert_string_equal(result.value.error.value.new.message, "failed to initialise column");
+
   qtb_column_dealloc(column);
   free(column);
   Py_DECREF(descriptor);
-
-  assert_false(success);
-  assert_exc_string_equal("failed to initialise column");
 }
 
 static void test_qtb_column_init_free_on_fail(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
-  bool success;
+  Result result;
 
   descriptor = new_descriptor("Name", "invalid");
   column = qtb_column_new_succeeds();
 
-  success = qtb_column_init(column, descriptor);
+  result = qtb_column_init(column, descriptor);
+  assert_true(ResultFailed(result));
+  assert_null(column->name);
+  assert_string_equal(result.value.error.value.new.message, "invalid column type");
+
   qtb_column_dealloc(column);
   free(column);
   Py_DECREF(descriptor);
-
-  assert_false(success);
-  assert_null(column->name);
-  assert_exc_string_equal("invalid column type");
 }
 
 static void test_qtb_column_repr_longest_of_first_five(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
-  size_t size;
+  ResultSize_t result;
 
   descriptor = new_descriptor("Level", "int");
   column = qtb_column_new_succeeds();
@@ -157,8 +158,9 @@ static void test_qtb_column_repr_longest_of_first_five(void **state) {
   qtb_column_init_succeeds(column, descriptor);
   Py_DECREF(descriptor);
 
-  size = qtb_column_repr_longest_of_first_five(column);
-  assert_int_equal(11, size);  // strlen("Level (int)")
+  result = qtb_column_repr_longest_of_first_five(column);
+  assert_true(ResultSuccessful(result));
+  assert_int_equal(11, ResultValue(result));  // strlen("Level (int)")
 
   qtb_column_dealloc(column);
   free(column);
@@ -167,7 +169,7 @@ static void test_qtb_column_repr_longest_of_first_five(void **state) {
 static void test_qtb_column_repr_longest_of_first_five_malloc_fails(void **state) {
   QtbColumn *column;
   PyObject *descriptor;
-  size_t size;
+  ResultSize_t result;
 
   descriptor = new_descriptor("Level", "int");
   column = qtb_column_new_succeeds();
@@ -176,8 +178,8 @@ static void test_qtb_column_repr_longest_of_first_five_malloc_fails(void **state
   Py_DECREF(descriptor);
 
   column->malloc = &failing_malloc;
-  size = qtb_column_repr_longest_of_first_five(column);
-  assert_int_equal(-1, size);
+  result = qtb_column_repr_longest_of_first_five(column);
+  assert_true(ResultFailed(result));
 
   qtb_column_dealloc(column);
   free(column);
@@ -187,7 +189,7 @@ static void test_qtb_column_repr_longest_of_first_five_shorter_row(void **state)
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *level;
-  size_t size;
+  ResultSize_t result;
 
   level = PyLong_FromLongLong_succeeds(0);
   descriptor = new_descriptor("Level", "int");
@@ -199,8 +201,9 @@ static void test_qtb_column_repr_longest_of_first_five_shorter_row(void **state)
   qtb_column_append_succeeds(column, level);
   Py_DECREF(level);
 
-  size = qtb_column_repr_longest_of_first_five(column);
-  assert_int_equal(11, size);  // strlen("Level (int)")
+  result = qtb_column_repr_longest_of_first_five(column);
+  assert_true(ResultSuccessful(result));
+  assert_int_equal(11, ResultValue(result));  // strlen("Level (int)")
 
   qtb_column_dealloc(column);
   free(column);
@@ -210,7 +213,7 @@ static void test_qtb_column_repr_longest_of_first_five_longer_row(void **state) 
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *level;
-  size_t size;
+  ResultSize_t result;
 
   level = PyLong_FromLongLong_succeeds(111111111111);
   descriptor = new_descriptor("Level", "int");
@@ -222,8 +225,9 @@ static void test_qtb_column_repr_longest_of_first_five_longer_row(void **state) 
   qtb_column_append_succeeds(column, level);
   Py_DECREF(level);
 
-  size = qtb_column_repr_longest_of_first_five(column);
-  assert_int_equal(12, size);  // strlen("111111111111")
+  result = qtb_column_repr_longest_of_first_five(column);
+  assert_true(ResultSuccessful(result));
+  assert_int_equal(12, ResultValue(result));  // strlen("111111111111")
 
   qtb_column_dealloc(column);
   free(column);
@@ -233,7 +237,7 @@ static void test_qtb_column_repr_longest_of_first_five_fifth_longer_row(void **s
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *level;
-  size_t size;
+  ResultSize_t result;
 
   level = PyLong_FromLongLong_succeeds(0);
   descriptor = new_descriptor("Level", "int");
@@ -250,8 +254,9 @@ static void test_qtb_column_repr_longest_of_first_five_fifth_longer_row(void **s
   qtb_column_append_succeeds(column, level);
   Py_DECREF(level);
 
-  size = qtb_column_repr_longest_of_first_five(column);
-  assert_int_equal(12, size);  // strlen("111111111111")
+  result = qtb_column_repr_longest_of_first_five(column);
+  assert_true(ResultSuccessful(result));
+  assert_int_equal(12, ResultValue(result));  // strlen("111111111111")
 
   qtb_column_dealloc(column);
   free(column);
@@ -261,7 +266,7 @@ static void test_qtb_column_repr_longest_of_first_five_sixth_ignored(void **stat
   QtbColumn *column;
   PyObject *descriptor;
   PyObject *level;
-  size_t size;
+  ResultSize_t result;
 
   level = PyLong_FromLongLong_succeeds(0);
   descriptor = new_descriptor("Level", "int");
@@ -278,8 +283,9 @@ static void test_qtb_column_repr_longest_of_first_five_sixth_ignored(void **stat
   qtb_column_append_succeeds(column, level);
   Py_DECREF(level);
 
-  size = qtb_column_repr_longest_of_first_five(column);
-  assert_int_equal(11, size);  // strlen("Level (int)")
+  result = qtb_column_repr_longest_of_first_five(column);
+  assert_true(ResultSuccessful(result));
+  assert_int_equal(11, ResultValue(result));  // strlen("Level (int)")
 
   qtb_column_dealloc(column);
   free(column);

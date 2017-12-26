@@ -34,11 +34,11 @@ typedef struct _QtbColumn {
   char     *(*PyUnicode_AsUTF8) (PyObject *);
 
   // Methods
-  PyObject   *(*get_as_pyobject) (struct _QtbColumn *, size_t);
-  Result      (*append)          (struct _QtbColumn *, PyObject *);
-  const char *(*type_as_str)     (void);
-  char       *(*cell_repr)       (struct _QtbColumn *, size_t);
-  void        (*dealloc)         (struct _QtbColumn *);
+  ResultPyObjectPtr  (*get_as_pyobject) (struct _QtbColumn *, size_t);
+  Result             (*append)          (struct _QtbColumn *, PyObject *);
+  const char        *(*type_as_str)     (void);
+  ResultCharPtr      (*cell_repr)       (struct _QtbColumn *, size_t);
+  void               (*dealloc)         (struct _QtbColumn *);
 
   char *name;
   QtbColumnType type;
@@ -55,15 +55,15 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m);
 #define MIN(a, b) (a < b ? a : b)
 #define MAX(a, b) (a > b ? a : b)
 
-bool qtb_column_init(QtbColumn *column, PyObject *descriptor);
-bool qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n);
+Result qtb_column_init(QtbColumn *column, PyObject *descriptor);
+Result qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n);
 void qtb_column_dealloc(QtbColumn *column);
-PyObject *qtb_column_as_descriptor(QtbColumn *column);
+ResultPyObjectPtr qtb_column_as_descriptor(QtbColumn *column);
 Result qtb_column_append(QtbColumn *column, PyObject *item);
-PyObject *qtb_column_get_as_pyobject(QtbColumn *column, size_t i);
+ResultPyObjectPtr qtb_column_get_as_pyobject(QtbColumn *column, size_t i);
 const char *qtb_column_type_as_str(QtbColumn *column);
-char *qtb_column_header_repr(QtbColumn *column);
-char *qtb_column_cell_repr(QtbColumn *column, size_t i);
-int qtb_column_repr_longest_of_first_five(QtbColumn *column);
+ResultCharPtr qtb_column_header_repr(QtbColumn *column);
+ResultCharPtr qtb_column_cell_repr(QtbColumn *column, size_t i);
+ResultSize_t qtb_column_repr_longest_of_first_five(QtbColumn *column);
 
 #endif
