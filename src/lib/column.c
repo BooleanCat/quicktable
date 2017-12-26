@@ -26,7 +26,7 @@ static Result qtb_column_append_str(QtbColumn *column, PyObject *item) {
   if (column->data[column->size].s == NULL)
     return ResultFailure(PyExc_MemoryError, "could not create PyUnicodeobject");
 
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 void qtb_column_dealloc_str(QtbColumn *column) {
@@ -65,7 +65,7 @@ static Result qtb_column_append_int(QtbColumn *column, PyObject *item) {
     return ResultFailure(PyExc_TypeError, "non-int entry for int column");
 
   column->data[column->size].i = PyLong_AsLongLong(item);
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 static const char *qtb_column_type_as_str_int() {
@@ -103,7 +103,7 @@ static Result qtb_column_append_float(QtbColumn *column, PyObject *item) {
     return ResultFailure(PyExc_TypeError, "non-float entry for float column");
 
   column->data[column->size].f = PyFloat_AsDouble(item);
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 static const char *qtb_column_type_as_str_float() {
@@ -141,7 +141,7 @@ static Result qtb_column_append_bool(QtbColumn *column, PyObject *item) {
     return ResultFailure(PyExc_TypeError, "non-bool entry for bool column");
 
   column->data[column->size].b = (bool)PyLong_AsLong(item);
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 static const char *qtb_column_type_as_str_bool() {
@@ -211,7 +211,7 @@ static Result qtb_column_grow(QtbColumn *column) {
   column->data = new_data;
   column->capacity = new_capacity;
 
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 Result qtb_column_append(QtbColumn *column, PyObject *item) {
@@ -228,7 +228,7 @@ Result qtb_column_append(QtbColumn *column, PyObject *item) {
     return result;
 
   column->size++;
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 const char *qtb_column_type_as_str(QtbColumn *column) {
@@ -248,7 +248,7 @@ static Result qtb_column_type_init(QtbColumn *column, PyObject *type) {
     return ResultFailure(PyExc_RuntimeError, "invalid column type");
   }
 
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
@@ -282,7 +282,7 @@ static Result qtb_column_init_name(QtbColumn *column, PyObject *name) {
   if (column->name == NULL)
     return ResultFailure(PyExc_MemoryError, "failed to initialise column");
 
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 Result qtb_column_init(QtbColumn *column, PyObject *descriptor) {
@@ -318,7 +318,7 @@ Result qtb_column_init(QtbColumn *column, PyObject *descriptor) {
   }
 
   qtb_column_init_methods(column);
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 Result qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t n) {
@@ -340,7 +340,7 @@ Result qtb_column_init_many(QtbColumn *columns, PyObject *blueprint, Py_ssize_t 
   }
 
   Py_DECREF(fast_blueprint);
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 void qtb_column_dealloc(QtbColumn *column) {

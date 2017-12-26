@@ -68,7 +68,7 @@ typedef struct {
   ResultValue value;
 } Result;
 
-#define ResultSuccess ((Result){RESULT_SUCCESS})
+#define ResultSuccess() ((Result){RESULT_SUCCESS})
 #define ResultFailure(py_err, message) ResultRegisterFailure(Result, py_err, message)
 #define ResultFailureFromPyErr() ResultRegisterFailureFromPyErr(Result)
 #define ResultFailureFromResult(result) ResultRegisterFailureFromResult(Result, result)

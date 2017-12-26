@@ -31,7 +31,7 @@ static int teardown(void **state) {
 static void test_result_success(void **state) {
   Result result;
 
-  result = ResultSuccess;
+  result = ResultSuccess();
 
   assert_true(ResultSuccessful(result));
   assert_false(ResultFailed(result));

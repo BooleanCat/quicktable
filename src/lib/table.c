@@ -100,7 +100,7 @@ static PySequenceMethods qtb_table_as_sequence = {
 
 static PyObject *qtb_table_append(QtbTable *self, PyObject *row) {
   PyObject *fast_row;
-  Result result = ResultSuccess;
+  Result result = ResultSuccess();
 
   if (PySequence_Check(row) != 1) {
     PyErr_SetString(PyExc_TypeError, "append with non-sequence");
@@ -257,7 +257,7 @@ static Result qtb_table_repr_cat_header(QtbTable *self, char *repr, size_t *padd
   }
 
   strcat(repr, "|");
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 static Result qtb_table_repr_cat_row(QtbTable *self, size_t row, char *repr, size_t *paddings) {
@@ -287,7 +287,7 @@ static Result qtb_table_repr_cat_row(QtbTable *self, size_t row, char *repr, siz
   }
 
   strcat(repr, "|");
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 static PyObject *qtb_table_tp_repr(QtbTable *self) {

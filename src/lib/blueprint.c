@@ -22,7 +22,7 @@ static Result qtb_validate_column_name(PyObject *descriptor) {
   if (name_check == 0)
     return ResultFailure(PyExc_TypeError, "invalid blueprint");
 
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 static bool qtb_valid_column_types_contains(PyObject *type) {
@@ -57,7 +57,7 @@ static Result qtb_validate_column_type(PyObject *descriptor) {
   if (!contains)
     return ResultFailure(PyExc_TypeError, "invalid blueprint");
 
-  return ResultSuccess;
+  return ResultSuccess();
 }
 
 static Result qtb_validate_descriptor(PyObject *descriptor) {
@@ -101,5 +101,5 @@ Result qtb_validate_blueprint(PyObject *blueprint) {
   }
 
   Py_DECREF(fast_blueprint);
-  return ResultSuccess;
+  return ResultSuccess();
 }
