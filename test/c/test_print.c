@@ -1,6 +1,5 @@
 #include <Python.h>
 #include "column.h"
-#include "print.h"
 #include "helpers.h"
 #include <stdarg.h>
 #include <stddef.h>
