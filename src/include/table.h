@@ -1,5 +1,5 @@
-#ifndef QTAB_TABLE_H
-#define QTAB_TABLE_H
+#ifndef QTB_TABLE_H
+#define QTB_TABLE_H
 
 #include <Python.h>
 #include "structmember.h"

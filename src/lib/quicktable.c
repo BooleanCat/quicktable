@@ -1,5 +1,4 @@
 #include <Python.h>
-#include "table.h"
 
 extern PyTypeObject QtbTableType;
 

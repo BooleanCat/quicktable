@@ -1,6 +1,7 @@
 #include "blueprint.h"
 #include "result.h"
 #include <stdbool.h>
+#include <Python.h>
 
 static const char *qtb_valid_column_types[] = {
   "str",

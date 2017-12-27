@@ -136,13 +136,22 @@ static PyObject *qtb_table_append(QtbTable *self, PyObject *row) {
 }
 
 static PyObject *qtb_table_pop(QtbTable *self) {
+  PyObject *row;
+
   if (self->size == 0) {
     PyErr_SetString(PyExc_IndexError, "pop from empty table");
     return NULL;
   }
 
+  row = qtb_table_item(self, self->size - 1);
+  if (row == NULL)
+    return NULL;
+
   self->size--;
-  Py_RETURN_NONE;
+  for (Py_ssize_t i = 0; i < self->width; i++)
+    self->columns[i].size--;
+
+  return row;
 }
 
 static PyMethodDef qtb_table_methods[] = {
