@@ -238,7 +238,7 @@ static Result qtb_table_repr_cat_header(QtbTable *self, char *repr, size_t *padd
   size_t header_len;
 
   for (size_t i = 0; i < (size_t)self->width; i++) {
-    header_result = qtb_column_header_repr(&self->columns[i]);
+    header_result = qtb_column_header_as_string(&self->columns[i]);
     if (ResultFailed(header_result))
       return ResultFailureFromResult(header_result);
     header_len = strlen(ResultValue(header_result));
@@ -268,7 +268,7 @@ static Result qtb_table_repr_cat_row(QtbTable *self, size_t row, char *repr, siz
   strcat(repr, "\n");
 
   for (size_t i = 0; i < (size_t)self->width; i++) {
-    cell_result = qtb_column_cell_repr(&self->columns[i], row);
+    cell_result = qtb_column_cell_as_string(&self->columns[i], row);
     if (ResultFailed(cell_result))
       return ResultFailureFromResult(cell_result);
     cell_len = strlen(ResultValue(cell_result));

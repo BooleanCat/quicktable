@@ -1,5 +1,5 @@
-#ifndef QTAB_COLUMN_H
-#define QTAB_COLUMN_H
+#ifndef QTB_COLUMN_H
+#define QTB_COLUMN_H
 
 #include <stdbool.h>
 #include <string.h>
@@ -30,14 +30,15 @@ typedef struct _QtbColumn {
   char     *(*strdup)           (const char *);
   void     *(*malloc)           (size_t);
   void     *(*realloc)          (void *, size_t);
+  int       (*snprintf_)        (char *, size_t, const char *, ...);
   PyObject *(*PyTuple_New)      (Py_ssize_t);
   char     *(*PyUnicode_AsUTF8) (PyObject *);
 
   // Methods
   ResultPyObjectPtr  (*get_as_pyobject) (struct _QtbColumn *, size_t);
   Result             (*append)          (struct _QtbColumn *, PyObject *);
-  const char        *(*type_as_str)     (void);
-  ResultCharPtr      (*cell_repr)       (struct _QtbColumn *, size_t);
+  const char        *(*type_as_string)  (void);
+  ResultCharPtr      (*cell_as_string)  (struct _QtbColumn *, size_t);
   void               (*dealloc)         (struct _QtbColumn *);
 
   char *name;
@@ -61,9 +62,9 @@ void qtb_column_dealloc(QtbColumn *column);
 ResultPyObjectPtr qtb_column_as_descriptor(QtbColumn *column);
 Result qtb_column_append(QtbColumn *column, PyObject *item);
 ResultPyObjectPtr qtb_column_get_as_pyobject(QtbColumn *column, size_t i);
-const char *qtb_column_type_as_str(QtbColumn *column);
-ResultCharPtr qtb_column_header_repr(QtbColumn *column);
-ResultCharPtr qtb_column_cell_repr(QtbColumn *column, size_t i);
+const char *qtb_column_type_as_string(QtbColumn *column);
+ResultCharPtr qtb_column_header_as_string(QtbColumn *column);
+ResultCharPtr qtb_column_cell_as_string(QtbColumn *column, size_t i);
 ResultSize_t qtb_column_repr_longest_of_first_five(QtbColumn *column);
 
 #endif

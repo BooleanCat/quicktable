@@ -44,6 +44,10 @@ void *failing_malloc(size_t size) {
   return NULL;
 }
 
+int failing_snprintf(char *str, size_t size, const char *format, ...) {
+  return -1;
+}
+
 void *failing_realloc(void *ptr, size_t size) {
   return NULL;
 }

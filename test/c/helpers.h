@@ -10,6 +10,7 @@ void assert_exc_string_equal(const char *);
 char *failing_strdup(const char *);
 void *failing_malloc(size_t);
 void *failing_realloc(void *, size_t);
+int failing_snprintf(char *, size_t, const char *, ...);
 char *failing_PyUnicode_AsUTF8(PyObject *);
 
 PyObject *PyUnicode_FromString_succeeds(const char *);
