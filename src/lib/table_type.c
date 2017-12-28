@@ -104,10 +104,10 @@ static PyGetSetDef qtb_table_getsetters[] = {
   {NULL}
 };
 
-static PyObject *qtb_table_as_string(QtbTable *self) {
+static PyObject *qtb_table_as_py_string(QtbTable *self) {
   ResultPyObjectPtr result;
 
-  result = qtb_table_as_string_(self);
+  result = qtb_table_as_py_string_(self);
   if (ResultFailed(result)) {
     ResultFailureRaise(result);
     return NULL;
@@ -126,7 +126,7 @@ PyTypeObject QtbTableType = {
     0,  // tp_getattr
     0,  // tp_setattr
     0,  // tp_reserved
-    (reprfunc)qtb_table_as_string,  // tp_repr
+    (reprfunc)qtb_table_as_py_string,  // tp_repr
     0,  // tp_as_number
     &qtb_table_as_sequence,  // tp_as_sequence
     0,  // tp_as_mapping

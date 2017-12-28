@@ -38,68 +38,69 @@ static ResultCharPtr qtb_table_as_string_init(QtbTable *self, size_t *cell_width
   return ResultCharPtrSuccess(string);
 }
 
-static void qtb_table_as_string_append_formatted(char *string, char *cell, size_t padding) {
-  size_t end;
+static size_t qtb_table_as_string_write_formatted(char *string, char *cell, size_t padding) {
   size_t cell_len;
   size_t spaces;
 
-  end = strlen(string);
   cell_len = strlen(cell);
   spaces = 1 + padding - cell_len;
 
-  strncpy(&string[end], "| ", 2);
-  strncpy(&string[end + 2], cell, cell_len);
-
-  end += 2 + cell_len;
+  strncpy(string, "| ", 2);
+  strncpy(&string[2], cell, cell_len);
 
   for (size_t i = 0; i < spaces; i++)
-    string[end + i] = ' ';
-  string[end + spaces] = '\0';
+    string[2 + cell_len + i] = ' ';
+
+  return 2 + cell_len + spaces;
 }
 
-static Result qtb_table_as_string_append_header(QtbTable *self, char *string, size_t *paddings) {
+static ResultSize_t qtb_table_as_string_append_header(QtbTable *self, char *string, size_t *paddings) {
   ResultCharPtr header;
+  size_t string_size = 0;
 
   for (size_t i = 0; i < (size_t)self->width; i++) {
     header = qtb_column_header_as_string(&self->columns[i]);
     if (ResultFailed(header))
-      return ResultFailureFromResult(header);
+      return ResultSize_tFailureFromResult(header);
 
-    qtb_table_as_string_append_formatted(string, ResultValue(header), paddings[i]);
+    string_size += qtb_table_as_string_write_formatted(&string[string_size], ResultValue(header), paddings[i]);
     free(ResultValue(header));
   }
 
-  strcat(string, "|");
-  return ResultSuccess();
+  string[string_size] = '|';
+  return ResultSize_tSuccess(string_size + 1);
 }
 
-static Result qtb_table_as_string_append_row(QtbTable *self, size_t row, char *string, size_t *paddings) {
+static ResultSize_t qtb_table_as_string_append_row(QtbTable *self, size_t row, char *string, size_t *paddings) {
   ResultCharPtr cell;
+  size_t string_size = 1;
 
-  strcat(string, "\n");
+  string[0] = '\n';
 
   for (size_t i = 0; i < (size_t)self->width; i++) {
     cell = qtb_column_cell_as_string(&self->columns[i], row);
     if (ResultFailed(cell))
-      return ResultFailureFromResult(cell);
+      return ResultSize_tFailureFromResult(cell);
 
-    qtb_table_as_string_append_formatted(string, ResultValue(cell), paddings[i]);
+    string_size += qtb_table_as_string_write_formatted(&string[string_size], ResultValue(cell), paddings[i]);
     free(ResultValue(cell));
   }
 
-  strcat(string, "|");
-  return ResultSuccess();
+  string[string_size] = '|';
+  return ResultSize_tSuccess(string_size + 1);
 }
 
-static Result qtb_table_as_string_append_rows(QtbTable *self, char *string, size_t *paddings) {
-  Result result;
+static ResultSize_t qtb_table_as_string_append_rows(QtbTable *self, char *string, size_t *paddings) {
+  ResultSize_t written;
+  size_t string_size = 0;
 
   for (Py_ssize_t i = 0; i < MIN(self->size, 5); i++) {
-    result = qtb_table_as_string_append_row(self, (size_t)i, string, paddings);
-    if (ResultFailed(result)) return result;
+    written = qtb_table_as_string_append_row(self, (size_t)i, &string[string_size], paddings);
+    if (ResultFailed(written)) return written;
+    string_size += ResultValue(written);
   }
 
-  return ResultSuccess();
+  return ResultSize_tSuccess(string_size);
 }
 
 static ResultPyObjectPtr qtb_table_as_string_empty() {
@@ -111,41 +112,54 @@ static ResultPyObjectPtr qtb_table_as_string_empty() {
   return ResultPyObjectPtrSuccess(empty_string);
 }
 
-ResultPyObjectPtr qtb_table_as_string_(QtbTable *self) {
-  PyObject *string_py;
+static ResultCharPtr qtb_table_as_string(QtbTable *self) {
   ResultSize_tPtr paddings;
-  Result result;
+  ResultSize_t written;
+  size_t string_size = 0;
   ResultCharPtr string;
 
-  if (self->width == 0) return qtb_table_as_string_empty();
-
   paddings = qtb_table_as_string_paddings(self);
-  if (ResultFailed(paddings)) return ResultPyObjectPtrFailureFromResult(paddings);
+  if (ResultFailed(paddings)) return ResultCharPtrFailureFromResult(paddings);
 
   string = qtb_table_as_string_init(self, ResultValue(paddings));
   if (ResultFailed(string)) {
     free(ResultValue(paddings));
-    return ResultPyObjectPtrFailureFromResult(string);
+    return string;
   }
 
-  result = qtb_table_as_string_append_header(self, ResultValue(string), ResultValue(paddings));
-  if (ResultFailed(result)) {
+  written = qtb_table_as_string_append_header(self, ResultValue(string), ResultValue(paddings));
+  if (ResultFailed(written)) {
     free(ResultValue(paddings));
     free(ResultValue(string));
-    return ResultPyObjectPtrFailureFromResult(result);
+    return ResultCharPtrFailureFromResult(written);
   }
+  string_size += ResultValue(written);
 
-  result = qtb_table_as_string_append_rows(self, ResultValue(string), ResultValue(paddings));
-  if (ResultFailed(result)) {
+  written = qtb_table_as_string_append_rows(self, &(ResultValue(string))[string_size], ResultValue(paddings));
+  if (ResultFailed(written)) {
     free(ResultValue(paddings));
     free(ResultValue(string));
-    return ResultPyObjectPtrFailureFromResult(result);
+    return ResultCharPtrFailureFromResult(written);
   }
+  string_size += ResultValue(written);
+  ResultValue(string)[string_size] = '\0';
 
   free(ResultValue(paddings));
-  string_py = PyUnicode_FromString(ResultValue(string));
+  return string;
+}
+
+ResultPyObjectPtr qtb_table_as_py_string_(QtbTable *self) {
+  PyObject *py_string;
+  ResultCharPtr string;
+
+  if (self->width == 0) return qtb_table_as_string_empty();
+
+  string = qtb_table_as_string(self);
+  if (ResultFailed(string)) return ResultPyObjectPtrFailureFromResult(string);
+
+  py_string = PyUnicode_FromString(ResultValue(string));
   free(ResultValue(string));
 
-  if (string_py == NULL) return ResultPyObjectPtrFailureFromPyErr();
-  return ResultPyObjectPtrSuccess(string_py);
+  if (py_string == NULL) return ResultPyObjectPtrFailureFromPyErr();
+  return ResultPyObjectPtrSuccess(py_string);
 }
