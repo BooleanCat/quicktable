@@ -79,18 +79,18 @@ const char *qtb_column_bool_type_as_string() {
 
 ResultCharPtr qtb_column_header_as_string_(QtbColumn *column) {
   int size;
-  char *repr;
+  char *string;
 
   size = 3 + strlen(column->name) + strlen(qtb_column_type_as_string(column));
-  repr = (char *)column->malloc(sizeof(char) * (size + 1));
-  if (repr == NULL)
+  string = (char *)column->malloc(sizeof(char) * (size + 1));
+  if (string == NULL)
     return ResultCharPtrFailure(PyExc_MemoryError, "memory error");
 
-  if (column->snprintf_(repr, size + 1, "%s (%s)", column->name, qtb_column_type_as_string(column)) != size) {
-    free(repr);
+  if (column->snprintf_(string, size + 1, "%s (%s)", column->name, qtb_column_type_as_string(column)) != size) {
+    free(string);
     return ResultCharPtrFailure(PyExc_RuntimeError, "failed to write header as string");
   }
-  return ResultCharPtrSuccess(repr);
+  return ResultCharPtrSuccess(string);
 }
 
 ResultSize_t qtb_column_repr_longest_of_first_five_(QtbColumn *column) {

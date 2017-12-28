@@ -22,6 +22,5 @@ ResultPyObjectPtr qtb_table_item_(QtbTable *self, Py_ssize_t i);
 Result qtb_table_append_(QtbTable *self, PyObject *row);
 ResultPyObjectPtr qtb_table_pop_(QtbTable *self);
 ResultPyObjectPtr qtb_table_blueprint_(QtbTable *self);
-ResultPyObjectPtr qtb_table_as_string_(QtbTable *self);
 
 #endif

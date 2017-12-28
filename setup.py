@@ -6,6 +6,7 @@ quicktable = Extension(
         'src/lib/quicktable.c',
         'src/lib/table.c',
         'src/lib/table_type.c',
+        'src/lib/table_repr.c',
         'src/lib/blueprint.c',
         'src/lib/column.c',
         'src/lib/column_repr.c',

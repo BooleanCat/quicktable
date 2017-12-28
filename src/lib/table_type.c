@@ -1,5 +1,6 @@
 #include <Python.h>
 #include "table.h"
+#include "table_repr.h"
 
 static PyObject *qtb_table_new(PyTypeObject *type, PyObject *args, PyObject *kwargs) {
   QtbTable *self;
