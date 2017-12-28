@@ -38,15 +38,23 @@ static ResultCharPtr qtb_table_as_string_init(QtbTable *self, size_t *cell_width
   return ResultCharPtrSuccess(string);
 }
 
-static void qtb_table_as_string_append_spaces(char *string, size_t spaces) {
-  for (size_t j = 0; j < spaces; j++)
-    strcat(string, " ");
-}
-
 static void qtb_table_as_string_append_formatted(char *string, char *cell, size_t padding) {
-  strcat(string, "| ");
-  strcat(string, cell);
-  qtb_table_as_string_append_spaces(string, 1 + padding - strlen(cell));
+  size_t end;
+  size_t cell_len;
+  size_t spaces;
+
+  end = strlen(string);
+  cell_len = strlen(cell);
+  spaces = 1 + padding - cell_len;
+
+  strncpy(&string[end], "| ", 2);
+  strncpy(&string[end + 2], cell, cell_len);
+
+  end += 2 + cell_len;
+
+  for (size_t i = 0; i < spaces; i++)
+    string[end + i] = ' ';
+  string[end + spaces] = '\0';
 }
 
 static Result qtb_table_as_string_append_header(QtbTable *self, char *string, size_t *paddings) {
