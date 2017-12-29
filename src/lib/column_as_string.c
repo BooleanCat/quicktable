@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "column_repr.h"
+#include "column_as_string.h"
 
 ResultCharPtr qtb_column_str_cell_as_string(QtbColumn *column, size_t i) {
   char *copy;

@@ -1,6 +1,6 @@
 #include "column.h"
 #include "result.h"
-#include "column_repr.h"
+#include "column_as_string.h"
 
 // ===== qtb_column_str =====
 

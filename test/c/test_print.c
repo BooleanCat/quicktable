@@ -1,6 +1,6 @@
 #include <Python.h>
 #include "column.h"
-#include "column_repr.h"
+#include "column_as_string.h"
 #include "helpers.h"
 #include <stdarg.h>
 #include <stddef.h>

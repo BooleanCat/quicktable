@@ -1,5 +1,5 @@
-#ifndef QTB_COLUMN_REPR_H
-#define QTB_COLUMN_REPR_H
+#ifndef QTB_COLUMN_AS_STRING_H
+#define QTB_COLUMN_AS_STRING_H
 
 #include "column.h"
 #include "result.h"
