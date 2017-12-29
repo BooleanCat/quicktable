@@ -17,7 +17,7 @@ void qtb_table_dealloc_(QtbTable *self) {
 Result qtb_table_init_(QtbTable *self, PyObject *blueprint) {
   Result result;
 
-  result = qtb_validate_blueprint(blueprint);
+  result = qtb_blueprint_validate(blueprint);
   if (ResultFailed(result)) return result;
 
   self->width = PySequence_Size(blueprint);

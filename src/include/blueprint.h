@@ -4,6 +4,6 @@
 #include <Python.h>
 #include "result.h"
 
-Result qtb_validate_blueprint(PyObject *blueprint);
+Result qtb_blueprint_validate(PyObject *blueprint);
 
 #endif

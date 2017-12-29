@@ -10,7 +10,7 @@ static const char *qtb_valid_column_types[] = {
   "float",
 };
 
-static Result qtb_validate_column_name(PyObject *descriptor) {
+static Result qtb_blueprint_validate_column_name(PyObject *descriptor) {
   PyObject *name;
   int name_check;
 
@@ -26,7 +26,7 @@ static Result qtb_validate_column_name(PyObject *descriptor) {
   return ResultSuccess();
 }
 
-static bool qtb_valid_column_types_contains(PyObject *type) {
+static bool qtb_blueprint_is_valid_column_type(PyObject *type) {
   bool contained = false;
 
   for (size_t i = 0; i < 4; i++) {
@@ -39,7 +39,7 @@ static bool qtb_valid_column_types_contains(PyObject *type) {
   return contained;
 }
 
-static Result qtb_validate_column_type(PyObject *descriptor) {
+static Result qtb_blueprint_validate_column_type(PyObject *descriptor) {
   PyObject *type;
   bool contains;
   int type_check;
@@ -53,7 +53,7 @@ static Result qtb_validate_column_type(PyObject *descriptor) {
     return ResultFailure(PyExc_TypeError, "invalid blueprint");
   }
 
-  contains = qtb_valid_column_types_contains(type);
+  contains = qtb_blueprint_is_valid_column_type(type);
   Py_DECREF(type);
   if (!contains)
     return ResultFailure(PyExc_TypeError, "invalid blueprint");
@@ -74,14 +74,14 @@ static Result qtb_validate_descriptor(PyObject *descriptor) {
   if (len != 2)
     return ResultFailure(PyExc_TypeError, "invalid blueprint");
 
-  result = qtb_validate_column_name(descriptor);
+  result = qtb_blueprint_validate_column_name(descriptor);
   if (ResultFailed(result))
     return result;
 
-  return qtb_validate_column_type(descriptor);
+  return qtb_blueprint_validate_column_type(descriptor);
 }
 
-Result qtb_validate_blueprint(PyObject *blueprint) {
+Result qtb_blueprint_validate(PyObject *blueprint) {
   Py_ssize_t len;
   PyObject *fast_blueprint;
   Result result;
