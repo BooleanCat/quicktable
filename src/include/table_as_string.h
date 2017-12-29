@@ -1,5 +1,5 @@
-#ifndef QTB_TABLE_REPR_H
-#define QTB_TABLE_REPR_H
+#ifndef QTB_TABLE_AS_STRING_H
+#define QTB_TABLE_AS_STRING_H
 
 #include "table.h"
 #include "result.h"
