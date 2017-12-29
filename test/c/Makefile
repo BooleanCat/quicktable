@@ -2,7 +2,16 @@ CFLAGS = ${PY_CFLAGS}
 LDFLAGS = ${PY_LDFLAGS}
 CC = gcc
 
-_OBJS = column.o column_as_string.o result.o test_column.o test_append.o test_print.o test_result.o tests.o helpers.o
+_OBJS = \
+	column.o \
+	column_as_string.o \
+	result.o \
+	test_column.o \
+	test_column_as_string.o \
+	test_append.o \
+	test_result.o \
+	tests.o \
+	helpers.o
 OBJS = $(patsubst %,build/%,$(_OBJS))
 
 build/helpers.o: helpers.c
@@ -23,7 +32,7 @@ build/test_column.o: test_column.c
 build/test_append.o: test_append.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
-build/test_print.o: test_print.c
+build/test_column_as_string.o: test_column_as_string.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
 build/test_result.o: test_result.c

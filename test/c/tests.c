@@ -7,7 +7,7 @@ int main(void) {
   return (
     test_append_run()
     || test_column_run()
-    || test_print_run()
+    || test_column_as_string_run()
     || test_result_run()
   );
 }

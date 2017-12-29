@@ -500,6 +500,6 @@ static const struct CMUnitTest tests[] = {
     register_test(test_qtb_column_bool_cell_as_string_strdup_fails),
 };
 
-int test_print_run() {
+int test_column_as_string_run() {
   return cmocka_run_group_tests(tests, NULL, NULL);
 }
