@@ -12,53 +12,53 @@ ResultCharPtr qtb_column_str_cell_as_string(QtbColumn *column, size_t i) {
 }
 
 ResultCharPtr qtb_column_int_cell_as_string(QtbColumn *column, size_t i) {
-  char *repr;
+  char *string;
   int size;
 
   size = column->snprintf_(NULL, 0, "%lld", column->data[i].i);
   if (size < 0)
     return ResultCharPtrFailure(PyExc_RuntimeError, "failed to get string length of cell");
 
-  repr = (char *)column->malloc(sizeof(char) * (size + 1));
-  if (repr == NULL)
+  string = (char *)column->malloc(sizeof(char) * (size + 1));
+  if (string == NULL)
     return ResultCharPtrFailure(PyExc_MemoryError, "memory error");
 
-  if (column->snprintf_(repr, size + 1, "%lld", column->data[i].i) != size) {
-    free(repr);
+  if (column->snprintf_(string, size + 1, "%lld", column->data[i].i) != size) {
+    free(string);
     return ResultCharPtrFailure(PyExc_RuntimeError, "failed to write cell as string");
   }
 
-  return ResultCharPtrSuccess(repr);
+  return ResultCharPtrSuccess(string);
 }
 
 ResultCharPtr qtb_column_float_cell_as_string(QtbColumn *column, size_t i) {
-  char *repr;
+  char *string;
   int size;
 
   size = column->snprintf_(NULL, 0, "%.2f", column->data[i].f);
   if (size < 0)
     return ResultCharPtrFailure(PyExc_RuntimeError, "failed to get string length of cell");
 
-  repr = (char *)column->malloc(sizeof(char) * (size + 1));
-  if (repr == NULL)
+  string = (char *)column->malloc(sizeof(char) * (size + 1));
+  if (string == NULL)
     return ResultCharPtrFailure(PyExc_MemoryError, "memory error");
 
-  if (column->snprintf_(repr, size + 1, "%.2f", column->data[i].f) != size) {
-    free(repr);
+  if (column->snprintf_(string, size + 1, "%.2f", column->data[i].f) != size) {
+    free(string);
     return ResultCharPtrFailure(PyExc_RuntimeError, "failed to write cell as string");
   }
 
-  return ResultCharPtrSuccess(repr);
+  return ResultCharPtrSuccess(string);
 }
 
 ResultCharPtr qtb_column_bool_cell_as_string(QtbColumn *column, size_t i) {
-  char *repr;
+  char *string;
 
-  repr = column->strdup(column->data[i].b ? "True" : "False");
-  if (repr == NULL)
+  string = column->strdup(column->data[i].b ? "True" : "False");
+  if (string == NULL)
     return ResultCharPtrFailure(PyExc_MemoryError, "memory error");
 
-  return ResultCharPtrSuccess(repr);
+  return ResultCharPtrSuccess(string);
 }
 
 const char *qtb_column_str_type_as_string() {
@@ -95,22 +95,22 @@ ResultCharPtr qtb_column_header_as_string_(QtbColumn *column) {
 
 ResultSize_t qtb_column_repr_longest_of_first_five_(QtbColumn *column) {
   size_t size;
-  ResultCharPtr result;
+  ResultCharPtr string;
 
-  result = qtb_column_header_as_string(column);
-  if (ResultFailed(result))
-    return ResultSize_tFailureFromResult(result);
+  string = qtb_column_header_as_string(column);
+  if (ResultFailed(string))
+    return ResultSize_tFailureFromResult(string);
 
-  size = strlen(ResultValue(result));
-  free(ResultValue(result));
+  size = strlen(ResultValue(string));
+  free(ResultValue(string));
 
   for (size_t i = 0; i < MIN(column->size, 5); i++) {
-    result = qtb_column_cell_as_string(column, i);
-    if (ResultFailed(result))
-      return ResultSize_tFailureFromResult(result);
+    string = qtb_column_cell_as_string(column, i);
+    if (ResultFailed(string))
+      return ResultSize_tFailureFromResult(string);
 
-    size = MAX(strlen(ResultValue(result)), size);
-    free(ResultValue(result));
+    size = MAX(strlen(ResultValue(string)), size);
+    free(ResultValue(string));
   }
 
   return ResultSize_tSuccess(size);
