@@ -48,7 +48,22 @@ typedef struct _QtbColumn {
   size_t capacity;
 } QtbColumn;
 
-QtbColumn *_qtb_column_new_many(size_t n, mallocer m);
+typedef union {
+  QtbColumn *value;
+  ResultError error;
+} QtbColumnPtrValue;
+
+typedef struct {
+  Result_HEAD
+  QtbColumnPtrValue value;
+} ResultQtbColumnPtr;
+
+#define ResultQtbColumnPtrSuccess(value) ResultRegisterSuccess(ResultQtbColumnPtr, value)
+#define ResultQtbColumnPtrFailure(py_err, message) ResultRegisterFailure(ResultQtbColumnPtr, py_err, message)
+#define ResultQtbColumnPtrFailureFromPyErr() ResultRegisterFailureFromPyErr(ResultQtbColumnPtr)
+#define ResultQtbColumnPtrFailureFromResult(result) ResultRegisterFailureFromResult(ResultQtbColumnPtr, result)
+
+ResultQtbColumnPtr _qtb_column_new_many(size_t n, mallocer m);
 #define qtb_column_new_many(n) _qtb_column_new_many(n, &malloc);
 #define _qtb_column_new(m) _qtb_column_new_many(1, m);
 #define qtb_column_new() _qtb_column_new_many(1, &malloc)

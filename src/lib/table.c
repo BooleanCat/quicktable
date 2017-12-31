@@ -16,6 +16,7 @@ void qtb_table_dealloc_(QtbTable *self) {
 
 Result qtb_table_init_(QtbTable *self, PyObject *blueprint) {
   Result result;
+  ResultQtbColumnPtr columns;
 
   result = qtb_blueprint_validate(blueprint);
   if (ResultFailed(result)) return result;
@@ -23,9 +24,9 @@ Result qtb_table_init_(QtbTable *self, PyObject *blueprint) {
   self->width = PySequence_Size(blueprint);
   if (self->width == -1) return ResultFailureFromPyErr();
 
-  self->columns = qtb_column_new_many((size_t)self->width);
-  if (self->columns == NULL)
-    return ResultFailure(PyExc_MemoryError, "failed to initialise table");
+  columns = qtb_column_new_many((size_t)self->width);
+  if (ResultFailed(columns)) return ResultFailureFromResult(columns);
+  self->columns = ResultValue(columns);
 
   result = qtb_column_init_many(self->columns, blueprint, self->width);
   if (ResultFailed(result)) free(self->columns);
@@ -41,11 +42,10 @@ ResultPyObjectPtr qtb_table_item_(QtbTable *self, Py_ssize_t i) {
   PyObject *row;
   ResultPyObjectPtr result;
 
-  if (i >= self->size)
-    return ResultPyObjectPtrFailure(PyExc_IndexError, "table index out of range");
+  if (i >= self->size) return ResultPyObjectPtrFailure(PyExc_IndexError, "table index out of range");
 
-  if ((row = PyList_New(self->width)) == NULL)
-    return ResultPyObjectPtrFailureFromPyErr();
+  row = PyList_New(self->width);
+  if (row == NULL) return ResultPyObjectPtrFailureFromPyErr();
 
   for (Py_ssize_t j = 0; j < self->width; j++) {
     result = qtb_column_get_as_pyobject(&self->columns[j], i);
@@ -61,25 +61,21 @@ ResultPyObjectPtr qtb_table_item_(QtbTable *self, Py_ssize_t i) {
 
 Result qtb_table_append_(QtbTable *self, PyObject *row) {
   PyObject *fast_row;
+  int row_size;
   Result result = ResultSuccess();
 
-  if (PySequence_Check(row) != 1)
-    return ResultFailure(PyExc_TypeError, "append with non-sequence");
+  if (PySequence_Check(row) != 1) return ResultFailure(PyExc_TypeError, "append with non-sequence");
 
-  if (PySequence_Size(row) != self->width) {
-    if (PyErr_Occurred() == NULL)
-      return ResultFailure(PyExc_TypeError, "append with mismatching row length");
-
-    return ResultFailureFromPyErr();
-  }
+  row_size = PySequence_Size(row);
+  if (row_size < 0) return ResultFailureFromPyErr();
+  if (row_size != self->width) return ResultFailure(PyExc_TypeError, "append with mismatching row length");
 
   fast_row = PySequence_Fast(row, "");
-  if (row == NULL) return ResultFailureFromPyErr();
+  if (fast_row == NULL) return ResultFailureFromPyErr();
 
   for (Py_ssize_t i = 0; i < self->width; i++) {
     result = qtb_column_append(&self->columns[i], PySequence_Fast_GET_ITEM(fast_row, i));
-    if (ResultFailed(result))
-      break;
+    if (ResultFailed(result)) break;
   }
 
   Py_DECREF(fast_row);
@@ -91,8 +87,7 @@ Result qtb_table_append_(QtbTable *self, PyObject *row) {
 ResultPyObjectPtr qtb_table_pop_(QtbTable *self) {
   ResultPyObjectPtr result;
 
-  if (self->size == 0)
-    return ResultPyObjectPtrFailure(PyExc_IndexError, "pop from empty table");
+  if (self->size == 0) return ResultPyObjectPtrFailure(PyExc_IndexError, "pop from empty table");
 
   result = qtb_table_item_(self, self->size - 1);
   if (ResultFailed(result)) return result;

@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include "result.h"
 
 static int setup(void **state) {
   PyGILState_STATE *gstate;
@@ -28,17 +29,17 @@ static int teardown(void **state) {
 }
 
 static void test_qtb_column_new_fails(void **state) {
-  QtbColumn *column;
+  ResultQtbColumnPtr column;
 
   column = _qtb_column_new(&failing_malloc);
-  assert_null(column);
+  assert_true(ResultFailed(column));
 }
 
 static void test_qtb_column_new_many_fails(void **state) {
-  QtbColumn *columns;
+  ResultQtbColumnPtr columns;
 
   columns = _qtb_column_new_many(20, &failing_malloc);
-  assert_null(columns);
+  assert_true(ResultFailed(columns));
 }
 
 static void test_qtb_column_init_does_not_change_descriptor_refcount(void **state) {

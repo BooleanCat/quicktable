@@ -188,12 +188,11 @@ static Result qtb_column_type_init(QtbColumn *column, PyObject *type) {
   return ResultSuccess();
 }
 
-QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
+ResultQtbColumnPtr _qtb_column_new_many(size_t n, mallocer m) {
   QtbColumn *columns;
 
   columns = (QtbColumn *)(*m)(sizeof(QtbColumn) * n);
-  if (columns == NULL)
-    return NULL;
+  if (columns == NULL) return ResultQtbColumnPtrFailure(PyExc_MemoryError, "memory error");
 
   for (size_t i = 0; i < n; i++) {
     columns[i].strdup = &strdup;
@@ -206,7 +205,7 @@ QtbColumn *_qtb_column_new_many(size_t n, mallocer m) {
     columns[i].data = NULL;
   }
 
-  return columns;
+  return ResultQtbColumnPtrSuccess(columns);
 }
 
 static Result qtb_column_init_name(QtbColumn *column, PyObject *name) {

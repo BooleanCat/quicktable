@@ -7,8 +7,7 @@ static ResultSize_tPtr qtb_table_as_string_paddings(QtbTable *self) {
   ResultSize_t result;
 
   paddings = (size_t *)malloc(self->width * sizeof(size_t));
-  if (paddings == NULL)
-    return ResultSize_tPtrFailure(PyExc_MemoryError, "memory error");
+  if (paddings == NULL) return ResultSize_tPtrFailure(PyExc_MemoryError, "memory error");
 
   for (size_t i = 0; i < (size_t)self->width; i++) {
     result = qtb_column_repr_longest_of_first_five(&self->columns[i]);
@@ -30,8 +29,7 @@ static ResultCharPtr qtb_table_as_string_init(QtbTable *self, size_t *cell_width
     row_size += cell_widths[i] + 3;
 
   string = (char *)malloc(row_size * (1 + MIN(self->size, 5)) * sizeof(char));
-  if (string == NULL)
-    return ResultCharPtrFailure(PyExc_MemoryError, "could not allocate memory");
+  if (string == NULL) return ResultCharPtrFailure(PyExc_MemoryError, "could not allocate memory");
 
   string[0] = '\0';
 
@@ -136,15 +134,14 @@ static ResultCharPtr qtb_table_as_string(QtbTable *self) {
   string_size += ResultValue(written);
 
   written = qtb_table_as_string_append_rows(self, &(ResultValue(string))[string_size], ResultValue(paddings));
+  free(ResultValue(paddings));
   if (ResultFailed(written)) {
-    free(ResultValue(paddings));
     free(ResultValue(string));
     return ResultCharPtrFailureFromResult(written);
   }
   string_size += ResultValue(written);
   ResultValue(string)[string_size] = '\0';
 
-  free(ResultValue(paddings));
   return string;
 }
 

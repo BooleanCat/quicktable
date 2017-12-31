@@ -89,12 +89,12 @@ void qtb_column_init_succeeds(QtbColumn *column, PyObject *descriptor) {
 }
 
 QtbColumn *qtb_column_new_succeeds() {
-  QtbColumn *column;
+  ResultQtbColumnPtr column;
 
   column = qtb_column_new();
-  assert_non_null(column);
+  assert_true(ResultSuccessful(column));
 
-  return column;
+  return ResultValue(column);
 }
 
 void qtb_column_append_succeeds(QtbColumn *column, PyObject *item) {
