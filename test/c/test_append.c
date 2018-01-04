@@ -35,9 +35,9 @@ static void test_qtb_column_append(void **state) {
   Result result;
 
   descriptor = new_descriptor("Name", "str");
-  name = PyUnicode_FromString_succeeds("Pikachu");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  name = PyUnicode_FromString_SUCCESS("Pikachu");
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
   result = qtb_column_append(column, name);
@@ -57,13 +57,13 @@ static void test_qtb_column_append_str_strdup_fails(void **state) {
   PyObject *name;
   Result result;
 
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
   descriptor = new_descriptor("Name", "str");
-  name = PyUnicode_FromString_succeeds("Pikachu");
+  name = PyUnicode_FromString_SUCCESS("Pikachu");
 
-  qtb_column_init_succeeds(column, descriptor);
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
-  column->strdup = &failing_strdup;
+  column->strdup = &strdup_FAIL;
 
   result = qtb_column_append(column, name);
   Py_DECREF(name);
@@ -82,12 +82,12 @@ static void test_qtb_column_append_str_PyUnicode_AsUTF8_fails(void **state) {
   PyObject *name;
   Result result;
 
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
   descriptor = new_descriptor("Name", "str");
-  name = PyUnicode_FromString_succeeds("Pikachu");
-  qtb_column_init_succeeds(column, descriptor);
+  name = PyUnicode_FromString_SUCCESS("Pikachu");
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
-  column->PyUnicode_AsUTF8 = &failing_PyUnicode_AsUTF8;
+  column->PyUnicode_AsUTF8 = &PyUnicode_AsUTF8_FAIL;
 
   result = qtb_column_append(column, name);
   assert_true(ResultFailed(result));
@@ -106,15 +106,15 @@ static void test_qtb_column_append_grow_fails(void **state) {
   PyObject *name;
   Result result;
 
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
   descriptor = new_descriptor("Name", "str");
-  qtb_column_init_succeeds(column, descriptor);
-  column->realloc = &failing_realloc;
+  qtb_column_init_SUCCESS(column, descriptor);
+  column->realloc = &realloc_FAIL;
 
-  name = PyUnicode_FromString_succeeds("Pikachu");
+  name = PyUnicode_FromString_SUCCESS("Pikachu");
 
   for (size_t i = 0; i < QTB_COLUMN_INITIAL_CAPACITY; i++)
-    qtb_column_append_succeeds(column, name);
+    qtb_column_append_SUCCESS(column, name);
 
   result = qtb_column_append(column, name);
   assert_true(ResultFailed(result));

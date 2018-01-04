@@ -39,8 +39,8 @@ static void test_qtb_column_str_header_as_string(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Name", "str");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
   result = qtb_column_header_as_string(column);
@@ -58,8 +58,8 @@ static void test_qtb_column_int_header_as_string(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
   result = qtb_column_header_as_string(column);
@@ -77,8 +77,8 @@ static void test_qtb_column_float_header_as_string(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Power", "float");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
   result = qtb_column_header_as_string(column);
@@ -96,8 +96,8 @@ static void test_qtb_column_bool_header_as_string(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Wild", "bool");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
   result = qtb_column_header_as_string(column);
@@ -115,11 +115,11 @@ static void test_qtb_column_header_as_string_malloc_fails(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Name", "str");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  column->malloc = &failing_malloc;
+  column->malloc = &malloc_FAIL;
   result = qtb_column_header_as_string(column);
   assert_true(ResultFailed(result));
   assert_string_equal(result.value.error.value.new.message, "memory error");
@@ -134,11 +134,11 @@ static void test_qtb_column_header_as_string_snprintf_fails(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Name", "str");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  column->snprintf_ = &failing_snprintf;
+  column->snprintf_ = &snprintf_FAIL;
   result = qtb_column_header_as_string(column);
   assert_true(ResultFailed(result));
   assert_string_equal(result.value.error.value.new.message, "failed to write header as string");
@@ -154,13 +154,13 @@ static void test_qtb_column_str_cell_as_string(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Name", "str");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  name = PyUnicode_FromString_succeeds("Pikachu");
+  name = PyUnicode_FromString_SUCCESS("Pikachu");
 
-  qtb_column_append_succeeds(column, name);
+  qtb_column_append_SUCCESS(column, name);
   Py_DECREF(name);
 
   result = qtb_column_cell_as_string(column, 0);
@@ -179,16 +179,16 @@ static void test_qtb_column_str_cell_as_string_strdup_fails(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Name", "str");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  name = PyUnicode_FromString_succeeds("Pikachu");
+  name = PyUnicode_FromString_SUCCESS("Pikachu");
 
-  qtb_column_append_succeeds(column, name);
+  qtb_column_append_SUCCESS(column, name);
   Py_DECREF(name);
 
-  column->strdup = &failing_strdup;
+  column->strdup = &strdup_FAIL;
   result = qtb_column_cell_as_string(column, 0);
   assert_true(ResultFailed(result));
   assert_string_equal(result.value.error.value.new.message, "memory error");
@@ -204,13 +204,13 @@ static void test_qtb_column_int_cell_as_string(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  level = PyLong_FromLongLong_succeeds(16);
+  level = PyLong_FromLongLong_SUCCESS(16);
 
-  qtb_column_append_succeeds(column, level);
+  qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
   result = qtb_column_cell_as_string(column, 0);
@@ -229,16 +229,16 @@ static void test_qtb_column_int_cell_as_string_snprintf_fails(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  level = PyLong_FromLongLong_succeeds(16);
+  level = PyLong_FromLongLong_SUCCESS(16);
 
-  qtb_column_append_succeeds(column, level);
+  qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
-  column->snprintf_ = &failing_snprintf;
+  column->snprintf_ = &snprintf_FAIL;
   result = qtb_column_cell_as_string(column, 0);
   assert_true(ResultFailed(result));
   assert_string_equal(result.value.error.value.new.message, "failed to get string length of cell");
@@ -254,16 +254,16 @@ static void test_qtb_column_int_cell_as_string_malloc_fails(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  level = PyLong_FromLongLong_succeeds(16);
+  level = PyLong_FromLongLong_SUCCESS(16);
 
-  qtb_column_append_succeeds(column, level);
+  qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
-  column->malloc = &failing_malloc;
+  column->malloc = &malloc_FAIL;
   result = qtb_column_cell_as_string(column, 0);
   assert_true(ResultFailed(result));
   assert_string_equal(result.value.error.value.new.message, "memory error");
@@ -279,13 +279,13 @@ static void test_qtb_column_int_cell_as_string_snprintf_fails_later(void **state
   ResultCharPtr result;
 
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  level = PyLong_FromLongLong_succeeds(16);
+  level = PyLong_FromLongLong_SUCCESS(16);
 
-  qtb_column_append_succeeds(column, level);
+  qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
   column->snprintf_ = &snprintf_return_n_then_n_minus_1;
@@ -304,13 +304,13 @@ static void test_qtb_column_float_cell_as_string(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Power", "float");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  power = PyFloat_FromDouble_succeeds(42.12);
+  power = PyFloat_FromDouble_SUCCESS(42.12);
 
-  qtb_column_append_succeeds(column, power);
+  qtb_column_append_SUCCESS(column, power);
   Py_DECREF(power);
 
   result = qtb_column_cell_as_string(column, 0);
@@ -329,16 +329,16 @@ static void test_qtb_column_float_cell_as_string_snprintf_fails(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Power", "float");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  power = PyFloat_FromDouble_succeeds(42.12);
+  power = PyFloat_FromDouble_SUCCESS(42.12);
 
-  qtb_column_append_succeeds(column, power);
+  qtb_column_append_SUCCESS(column, power);
   Py_DECREF(power);
 
-  column->snprintf_ = &failing_snprintf;
+  column->snprintf_ = &snprintf_FAIL;
   result = qtb_column_cell_as_string(column, 0);
   assert_true(ResultFailed(result));
   assert_string_equal(result.value.error.value.new.message, "failed to get string length of cell");
@@ -354,16 +354,16 @@ static void test_qtb_column_float_cell_as_string_malloc_fails(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Power", "float");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  power = PyFloat_FromDouble_succeeds(42.12);
+  power = PyFloat_FromDouble_SUCCESS(42.12);
 
-  qtb_column_append_succeeds(column, power);
+  qtb_column_append_SUCCESS(column, power);
   Py_DECREF(power);
 
-  column->malloc = &failing_malloc;
+  column->malloc = &malloc_FAIL;
   result = qtb_column_cell_as_string(column, 0);
   assert_true(ResultFailed(result));
   assert_string_equal(result.value.error.value.new.message, "memory error");
@@ -379,13 +379,13 @@ static void test_qtb_column_float_cell_as_string_snprintf_fails_later(void **sta
   ResultCharPtr result;
 
   descriptor = new_descriptor("Power", "float");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  power = PyFloat_FromDouble_succeeds(42.12);
+  power = PyFloat_FromDouble_SUCCESS(42.12);
 
-  qtb_column_append_succeeds(column, power);
+  qtb_column_append_SUCCESS(column, power);
   Py_DECREF(power);
 
   column->snprintf_ = &snprintf_return_n_then_n_minus_1;
@@ -404,13 +404,13 @@ static void test_qtb_column_bool_cell_as_string_true(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Wild", "bool");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  wild = PyBool_FromLong_succeeds(1);
+  wild = PyBool_FromLong_SUCCESS(1);
 
-  qtb_column_append_succeeds(column, wild);
+  qtb_column_append_SUCCESS(column, wild);
   Py_DECREF(wild);
 
   result = qtb_column_cell_as_string(column, 0);
@@ -429,13 +429,13 @@ static void test_qtb_column_bool_cell_as_string_false(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Wild", "bool");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  wild = PyBool_FromLong_succeeds(0);
+  wild = PyBool_FromLong_SUCCESS(0);
 
-  qtb_column_append_succeeds(column, wild);
+  qtb_column_append_SUCCESS(column, wild);
   Py_DECREF(wild);
 
   result = qtb_column_cell_as_string(column, 0);
@@ -454,16 +454,16 @@ static void test_qtb_column_bool_cell_as_string_strdup_fails(void **state) {
   ResultCharPtr result;
 
   descriptor = new_descriptor("Wild", "bool");
-  column = qtb_column_new_succeeds();
-  qtb_column_init_succeeds(column, descriptor);
+  column = qtb_column_new_SUCCESS();
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  wild = PyBool_FromLong_succeeds(1);
+  wild = PyBool_FromLong_SUCCESS(1);
 
-  qtb_column_append_succeeds(column, wild);
+  qtb_column_append_SUCCESS(column, wild);
   Py_DECREF(wild);
 
-  column->strdup = &failing_strdup;
+  column->strdup = &strdup_FAIL;
   result = qtb_column_cell_as_string(column, 0);
   assert_true(ResultFailed(result));
   assert_string_equal(result.value.error.value.new.message, "memory error");

@@ -6,7 +6,7 @@ static PyObject *qtb_table_new(PyTypeObject *type, PyObject *args, PyObject *kwa
   QtbTable *self;
 
   self = (QtbTable *)type->tp_alloc(type, 0);
-  if (self != NULL) qtb_table_zero(self);
+  if (self != NULL) qtb_table_new_(self);
 
   return (PyObject *)self;
 }

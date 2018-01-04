@@ -319,7 +319,7 @@ static void test_result_pyobject_ptr_success(void **state) {
   ResultPyObjectPtr result;
   PyObject *four;
 
-  four = PyLong_FromLongLong_succeeds(4);
+  four = PyLong_FromLongLong_SUCCESS(4);
   result = ResultPyObjectPtrSuccess(four);
 
   assert_true(ResultSuccessful(result));

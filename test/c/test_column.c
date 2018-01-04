@@ -31,14 +31,14 @@ static int teardown(void **state) {
 static void test_qtb_column_new_fails(void **state) {
   ResultQtbColumnPtr column;
 
-  column = _qtb_column_new(&failing_malloc);
+  column = _qtb_column_new(&malloc_FAIL);
   assert_true(ResultFailed(column));
 }
 
 static void test_qtb_column_new_many_fails(void **state) {
   ResultQtbColumnPtr columns;
 
-  columns = _qtb_column_new_many(20, &failing_malloc);
+  columns = _qtb_column_new_many(20, &malloc_FAIL);
   assert_true(ResultFailed(columns));
 }
 
@@ -47,7 +47,7 @@ static void test_qtb_column_init_does_not_change_descriptor_refcount(void **stat
   PyObject *descriptor;
   Py_ssize_t descriptor_ref_count;
 
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
   descriptor = new_descriptor("Name", "str");
   descriptor_ref_count = Py_REFCNT(descriptor);
@@ -65,7 +65,7 @@ static void test_qtb_column_init_does_not_change_name_refcount(void **state) {
   PyObject *descriptor;
   Py_ssize_t name_ref_count;
 
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
   descriptor = new_descriptor("Name", "str");
   name_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 0));
@@ -83,7 +83,7 @@ static void test_qtb_column_init_does_not_change_type_refcount(void **state) {
   PyObject *descriptor;
   Py_ssize_t type_ref_count;
 
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
   descriptor = new_descriptor("Name", "str");
   type_ref_count = Py_REFCNT(PyTuple_GET_ITEM(descriptor, 1));
@@ -100,7 +100,7 @@ static void test_qtb_column_init_descriptor_not_sequence(void **state) {
   QtbColumn *column;
   Result result;
 
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
   result = qtb_column_init(column, Py_None);
   assert_true(ResultFailed(result));
@@ -116,8 +116,8 @@ static void test_qtb_column_init_strdup_fails(void **state) {
   PyObject *descriptor;
   Result result;
 
-  column = qtb_column_new_succeeds();
-  column->strdup = &failing_strdup;
+  column = qtb_column_new_SUCCESS();
+  column->strdup = &strdup_FAIL;
 
   descriptor = new_descriptor("Name", "str");
 
@@ -136,7 +136,7 @@ static void test_qtb_column_init_free_on_fail(void **state) {
   Result result;
 
   descriptor = new_descriptor("Name", "invalid");
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
   result = qtb_column_init(column, descriptor);
   assert_true(ResultFailed(result));
@@ -154,9 +154,9 @@ static void test_qtb_column_repr_longest_of_first_five(void **state) {
   ResultSize_t result;
 
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
-  qtb_column_init_succeeds(column, descriptor);
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
   result = qtb_column_repr_longest_of_first_five(column);
@@ -173,12 +173,12 @@ static void test_qtb_column_repr_longest_of_first_five_malloc_fails(void **state
   ResultSize_t result;
 
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
-  qtb_column_init_succeeds(column, descriptor);
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  column->malloc = &failing_malloc;
+  column->malloc = &malloc_FAIL;
   result = qtb_column_repr_longest_of_first_five(column);
   assert_true(ResultFailed(result));
 
@@ -192,14 +192,14 @@ static void test_qtb_column_repr_longest_of_first_five_shorter_row(void **state)
   PyObject *level;
   ResultSize_t result;
 
-  level = PyLong_FromLongLong_succeeds(0);
+  level = PyLong_FromLongLong_SUCCESS(0);
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
-  qtb_column_init_succeeds(column, descriptor);
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  qtb_column_append_succeeds(column, level);
+  qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
   result = qtb_column_repr_longest_of_first_five(column);
@@ -216,14 +216,14 @@ static void test_qtb_column_repr_longest_of_first_five_longer_row(void **state) 
   PyObject *level;
   ResultSize_t result;
 
-  level = PyLong_FromLongLong_succeeds(111111111111);
+  level = PyLong_FromLongLong_SUCCESS(111111111111);
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
-  qtb_column_init_succeeds(column, descriptor);
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
-  qtb_column_append_succeeds(column, level);
+  qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
   result = qtb_column_repr_longest_of_first_five(column);
@@ -240,19 +240,19 @@ static void test_qtb_column_repr_longest_of_first_five_fifth_longer_row(void **s
   PyObject *level;
   ResultSize_t result;
 
-  level = PyLong_FromLongLong_succeeds(0);
+  level = PyLong_FromLongLong_SUCCESS(0);
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
-  qtb_column_init_succeeds(column, descriptor);
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
   for (size_t i = 0; i < 4; i++)
-    qtb_column_append_succeeds(column, level);
+    qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
-  level = PyLong_FromLongLong_succeeds(111111111111);
-  qtb_column_append_succeeds(column, level);
+  level = PyLong_FromLongLong_SUCCESS(111111111111);
+  qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
   result = qtb_column_repr_longest_of_first_five(column);
@@ -269,19 +269,19 @@ static void test_qtb_column_repr_longest_of_first_five_sixth_ignored(void **stat
   PyObject *level;
   ResultSize_t result;
 
-  level = PyLong_FromLongLong_succeeds(0);
+  level = PyLong_FromLongLong_SUCCESS(0);
   descriptor = new_descriptor("Level", "int");
-  column = qtb_column_new_succeeds();
+  column = qtb_column_new_SUCCESS();
 
-  qtb_column_init_succeeds(column, descriptor);
+  qtb_column_init_SUCCESS(column, descriptor);
   Py_DECREF(descriptor);
 
   for (size_t i = 0; i < 5; i++)
-    qtb_column_append_succeeds(column, level);
+    qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
-  level = PyLong_FromLongLong_succeeds(111111111111);
-  qtb_column_append_succeeds(column, level);
+  level = PyLong_FromLongLong_SUCCESS(111111111111);
+  qtb_column_append_SUCCESS(column, level);
   Py_DECREF(level);
 
   result = qtb_column_repr_longest_of_first_five(column);

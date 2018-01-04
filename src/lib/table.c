@@ -1,10 +1,20 @@
 #include "table.h"
 #include "result.h"
 
-void qtb_table_zero(QtbTable *self) {
+static ResultQtbColumnPtr column_new_many(size_t size) {
+  return qtb_column_new_many(size);
+}
+
+void qtb_table_new_(QtbTable *self) {
   self->size = 0;
   self->width = 0;
   self->columns = NULL;
+
+  self->PySequence_Size = &PySequence_Size;
+  self->PyList_New = &PyList_New;
+  self->column_new_many = &column_new_many;
+  self->column_init_many = &qtb_column_init_many;
+  self->column_as_descriptor = &qtb_column_as_descriptor;
 }
 
 void qtb_table_dealloc_(QtbTable *self) {
@@ -21,14 +31,14 @@ Result qtb_table_init_(QtbTable *self, PyObject *blueprint) {
   result = qtb_blueprint_validate(blueprint);
   if (ResultFailed(result)) return result;
 
-  self->width = PySequence_Size(blueprint);
+  self->width = self->PySequence_Size(blueprint);
   if (self->width == -1) return ResultFailureFromPyErr();
 
-  columns = qtb_column_new_many((size_t)self->width);
+  columns = self->column_new_many((size_t)self->width);
   if (ResultFailed(columns)) return ResultFailureFromResult(columns);
   self->columns = ResultValue(columns);
 
-  result = qtb_column_init_many(self->columns, blueprint, self->width);
+  result = self->column_init_many(self->columns, blueprint, self->width);
   if (ResultFailed(result)) free(self->columns);
 
   return result;
@@ -103,11 +113,11 @@ ResultPyObjectPtr qtb_table_blueprint_(QtbTable *self) {
   PyObject *blueprint;
   ResultPyObjectPtr result;
 
-  blueprint = PyList_New(self->width);
+  blueprint = self->PyList_New(self->width);
   if (blueprint == NULL) return ResultPyObjectPtrFailureFromPyErr();
 
   for (Py_ssize_t i = 0; i < self->width; i++) {
-    result = qtb_column_as_descriptor(&self->columns[i]);
+    result = self->column_as_descriptor(&self->columns[i]);
     if (ResultFailed(result)) {
       Py_DECREF(blueprint);
       return result;

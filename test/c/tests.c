@@ -9,5 +9,6 @@ int main(void) {
     || test_column_run()
     || test_column_as_string_run()
     || test_result_run()
+    || test_table_run()
   );
 }
