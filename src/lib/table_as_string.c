@@ -58,8 +58,7 @@ static ResultSize_t qtb_table_as_string_append_header(QtbTable *self, char *stri
 
   for (size_t i = 0; i < (size_t)self->width; i++) {
     header = qtb_column_header_as_string(&self->columns[i]);
-    if (ResultFailed(header))
-      return ResultSize_tFailureFromResult(header);
+    if (ResultFailed(header)) return ResultSize_tFailureFromResult(header);
 
     string_size += qtb_table_as_string_write_formatted(&string[string_size], ResultValue(header), paddings[i]);
     free(ResultValue(header));
@@ -77,8 +76,7 @@ static ResultSize_t qtb_table_as_string_append_row(QtbTable *self, size_t row, c
 
   for (size_t i = 0; i < (size_t)self->width; i++) {
     cell = qtb_column_cell_as_string(&self->columns[i], row);
-    if (ResultFailed(cell))
-      return ResultSize_tFailureFromResult(cell);
+    if (ResultFailed(cell)) return ResultSize_tFailureFromResult(cell);
 
     string_size += qtb_table_as_string_write_formatted(&string[string_size], ResultValue(cell), paddings[i]);
     free(ResultValue(cell));

@@ -17,16 +17,13 @@ static PyModuleDef quicktable_module = {
 PyMODINIT_FUNC PyInit_quicktable() {
   PyObject *module;
 
-  if (PyType_Ready(&QtbTableType) < 0)
-    return NULL;
+  if (PyType_Ready(&QtbTableType) < 0) return NULL;
 
   module = PyModule_Create(&quicktable_module);
-  if (module == NULL)
-    return NULL;
+  if (module == NULL) return NULL;
 
   Py_INCREF(&QtbTableType);
-  if (PyModule_AddObject(module, "Table", (PyObject *)&QtbTableType) == -1)
-    return NULL;
+  if (PyModule_AddObject(module, "Table", (PyObject *)&QtbTableType) == -1) return NULL;
 
   return module;
 }

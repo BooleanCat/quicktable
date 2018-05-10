@@ -20,8 +20,8 @@ static Result qtb_column_append_str(QtbColumn *column, PyObject *item) {
   if (PyUnicode_Check(item) == 0)
     return ResultFailure(PyExc_TypeError, "non-str entry for str column");
 
-  if ((s = column->PyUnicode_AsUTF8(item)) == NULL)
-    return ResultFailureFromPyErr();
+  s = column->PyUnicode_AsUTF8(item);
+  if (s == NULL) return ResultFailureFromPyErr();
 
   column->data[column->size].s = column->strdup(s);
   if (column->data[column->size].s == NULL)
@@ -61,8 +61,7 @@ static ResultPyObjectPtr qtb_column_get_as_pyobject_float(QtbColumn *column, siz
   PyObject *str;
 
   str = PyFloat_FromDouble(column->data[i].f);
-  if (str == NULL)
-    return ResultPyObjectPtrFailureFromPyErr();
+  if (str == NULL) return ResultPyObjectPtrFailureFromPyErr();
 
   return ResultPyObjectPtrSuccess(str);
 }
@@ -81,8 +80,7 @@ static ResultPyObjectPtr qtb_column_get_as_pyobject_bool(QtbColumn *column, size
   PyObject *str;
 
   str = PyBool_FromLong(column->data[i].b);
-  if (str == NULL)
-    return ResultPyObjectPtrFailureFromPyErr();
+  if (str == NULL) return ResultPyObjectPtrFailureFromPyErr();
 
   return ResultPyObjectPtrSuccess(str);
 }
@@ -142,8 +140,7 @@ static Result qtb_column_grow(QtbColumn *column) {
 
   new_capacity = QTB_COLUMN_GROWTH_COEFFICIENT * column->capacity;
   new_data = (QtbColumnData *)column->realloc(column->data, new_capacity * sizeof(QtbColumnData));
-  if (new_data == NULL)
-    return ResultFailure(PyExc_MemoryError, "failed to grow column");
+  if (new_data == NULL) return ResultFailure(PyExc_MemoryError, "failed to grow column");
 
   column->data = new_data;
   column->capacity = new_capacity;
@@ -156,13 +153,11 @@ Result qtb_column_append(QtbColumn *column, PyObject *item) {
 
   if (column->capacity == column->size) {
     result = qtb_column_grow(column);
-    if (ResultFailed(result))
-      return result;
+    if (ResultFailed(result)) return result;
   }
 
   result = column->append(column, item);
-  if (ResultFailed(result))
-    return result;
+  if (ResultFailed(result)) return result;
 
   column->size++;
   return ResultSuccess();
@@ -212,12 +207,10 @@ static Result qtb_column_init_name(QtbColumn *column, PyObject *name) {
   char *name_s;
 
   name_s = column->PyUnicode_AsUTF8(name);
-  if (name == NULL)
-    return ResultFailureFromPyErr();
+  if (name == NULL) return ResultFailureFromPyErr();
 
   column->name = column->strdup(name_s);
-  if (column->name == NULL)
-    return ResultFailure(PyExc_MemoryError, "failed to initialise column");
+  if (column->name == NULL) return ResultFailure(PyExc_MemoryError, "failed to initialise column");
 
   return ResultSuccess();
 }
@@ -230,8 +223,7 @@ Result qtb_column_init(QtbColumn *column, PyObject *descriptor) {
   column->capacity = QTB_COLUMN_INITIAL_CAPACITY;
 
   fast_descriptor = PySequence_Fast(descriptor, "descriptor not a sequence");
-  if (fast_descriptor == NULL)
-    return ResultFailureFromPyErr();
+  if (fast_descriptor == NULL) return ResultFailureFromPyErr();
 
   result = qtb_column_init_name(column, PySequence_Fast_GET_ITEM(fast_descriptor, 0));
   if (ResultFailed(result)) {
@@ -284,8 +276,7 @@ void qtb_column_dealloc(QtbColumn *column) {
   free(column->name);
   column->name = NULL;
 
-  if (column->size > 0)
-    column->dealloc(column);
+  if (column->size > 0) column->dealloc(column);
 
   free(column->data);
   column->data = NULL;
