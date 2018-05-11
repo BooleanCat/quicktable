@@ -4,12 +4,12 @@ quicktable = Extension(
     'quicktable',
     [
         'src/lib/quicktable.c',
-        'src/lib/table.c',
-        'src/lib/table_type.c',
-        'src/lib/table_as_string.c',
+        'src/lib/table/table.c',
+        'src/lib/table/table_type.c',
+        'src/lib/table/table_as_string.c',
         'src/lib/blueprint.c',
-        'src/lib/column.c',
-        'src/lib/column_as_string.c',
+        'src/lib/column/column.c',
+        'src/lib/column/column_as_string.c',
         'src/lib/result.c',
     ],
 )

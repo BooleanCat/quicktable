@@ -20,16 +20,16 @@ OBJS = $(patsubst %,build/%,$(_OBJS))
 build/helpers.o: helpers.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
-build/column.o: ../../src/lib/column.c
+build/column.o: ../../src/lib/column/column.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
-build/table.o: ../../src/lib/table.c
+build/table.o: ../../src/lib/table/table.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
 build/blueprint.o: ../../src/lib/blueprint.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
-build/column_as_string.o: ../../src/lib/column_as_string.c
+build/column_as_string.o: ../../src/lib/column/column_as_string.c
 	$(CC) -o $@ -c $(CFLAGS) -I../../src/include $^
 
 build/result.o: ../../src/lib/result.c
