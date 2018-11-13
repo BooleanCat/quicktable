@@ -11,7 +11,7 @@ char *strdup_FAIL(const char *);
 void *malloc_FAIL(size_t);
 void *realloc_FAIL(void *, size_t);
 int snprintf_FAIL(char *, size_t, const char *, ...);
-char *PyUnicode_AsUTF8_FAIL(PyObject *);
+const char *PyUnicode_AsUTF8_FAIL(PyObject *);
 Py_ssize_t PySequence_Size_FAIL(PyObject *);
 PyObject *PyList_New_FAIL(Py_ssize_t);
 ResultQtbColumnPtr qtb_column_new_many_FAIL(size_t);

@@ -27,12 +27,12 @@ typedef union {
 
 typedef struct _QtbColumn {
   // Override implementation hooks
-  char     *(*strdup)           (const char *);
-  void     *(*malloc)           (size_t);
-  void     *(*realloc)          (void *, size_t);
-  int       (*snprintf_)        (char *, size_t, const char *, ...);
-  PyObject *(*PyTuple_New)      (Py_ssize_t);
-  char     *(*PyUnicode_AsUTF8) (PyObject *);
+  char       *(*strdup)           (const char *);
+  void       *(*malloc)           (size_t);
+  void       *(*realloc)          (void *, size_t);
+  int         (*snprintf_)        (char *, size_t, const char *, ...);
+  PyObject   *(*PyTuple_New)      (Py_ssize_t);
+  const char *(*PyUnicode_AsUTF8) (PyObject *);
 
   // Methods
   ResultPyObjectPtr  (*get_as_pyobject) (struct _QtbColumn *, size_t);

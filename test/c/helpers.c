@@ -35,7 +35,7 @@ char *strdup_FAIL(const char *s) {
   return NULL;
 }
 
-char *PyUnicode_AsUTF8_FAIL(PyObject *s) {
+const char *PyUnicode_AsUTF8_FAIL(PyObject *s) {
   PyErr_SetString(PyExc_RuntimeError, "PyUnicode_AsUTF8 failed");
   return NULL;
 }

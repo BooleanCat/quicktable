@@ -15,7 +15,7 @@ static ResultPyObjectPtr qtb_column_get_as_pyobject_str(QtbColumn *column, size_
 }
 
 static Result qtb_column_append_str(QtbColumn *column, PyObject *item) {
-  char *s;
+  const char *s;
 
   if (PyUnicode_Check(item) == 0)
     return ResultFailure(PyExc_TypeError, "non-str entry for str column");
@@ -204,7 +204,7 @@ ResultQtbColumnPtr _qtb_column_new_many(size_t n, mallocer m) {
 }
 
 static Result qtb_column_init_name(QtbColumn *column, PyObject *name) {
-  char *name_s;
+  const char *name_s;
 
   name_s = column->PyUnicode_AsUTF8(name);
   if (name == NULL) return ResultFailureFromPyErr();
