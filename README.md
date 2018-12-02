@@ -7,7 +7,7 @@ Installation
 ------------
 ```shell
 git clone https://github.com/BooleanCat/quicktable
-cd quicktable && ./scripts/install.sh
+cd quicktable && make install
 ```
 
 A quick look

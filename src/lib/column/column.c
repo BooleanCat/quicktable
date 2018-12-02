@@ -8,8 +8,7 @@ static ResultPyObjectPtr qtb_column_get_as_pyobject_str(QtbColumn *column, size_
   PyObject *str;
 
   str = PyUnicode_FromString(column->data[i].s);
-  if (str == NULL)
-    return ResultPyObjectPtrFailureFromPyErr();
+  if (str == NULL) return ResultPyObjectPtrFailureFromPyErr();
 
   return ResultPyObjectPtrSuccess(str);
 }
@@ -17,15 +16,13 @@ static ResultPyObjectPtr qtb_column_get_as_pyobject_str(QtbColumn *column, size_
 static Result qtb_column_append_str(QtbColumn *column, PyObject *item) {
   const char *s;
 
-  if (PyUnicode_Check(item) == 0)
-    return ResultFailure(PyExc_TypeError, "non-str entry for str column");
+  if (PyUnicode_Check(item) == 0) return ResultFailure(PyExc_TypeError, "non-str entry for str column");
 
   s = column->PyUnicode_AsUTF8(item);
   if (s == NULL) return ResultFailureFromPyErr();
 
   column->data[column->size].s = column->strdup(s);
-  if (column->data[column->size].s == NULL)
-    return ResultFailure(PyExc_MemoryError, "could not create PyUnicodeobject");
+  if (column->data[column->size].s == NULL) return ResultFailure(PyExc_MemoryError, "could not create PyUnicodeobject");
 
   return ResultSuccess();
 }
