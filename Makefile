@@ -1,4 +1,4 @@
-.PHONY: test test-c test-py
+.PHONY: test test-c test-py clean uninstall
 
 SHELL := /bin/bash
 
@@ -9,17 +9,19 @@ LDFLAGS = $(shell python-config --ldflags)
 install:
 	python setup.py install
 
+uninstall:
+	pip uninstall --yes quicktable
+
 test: build-c/qtb_tests test-c install test-py
 
 test-py:
 	py.test -v
 
-clean:
+clean: uninstall
 	rm -rf build/*
 	rm -rf build-c/*
 	rm -rf quicktable.egg-info/*
 	rm -rf dist/*
-	pip uninstall --yes quicktable
 
 # ===== C tests =====
 
