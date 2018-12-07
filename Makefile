@@ -15,7 +15,11 @@ test-py:
 	py.test -v
 
 clean:
+	rm -rf build/*
 	rm -rf build-c/*
+	rm -rf quicktable.egg-info/*
+	rm -rf dist/*
+	pip uninstall --yes quicktable
 
 # ===== C tests =====
 
