@@ -42,3 +42,7 @@ def test_slice_negative_two_rows(table):
 
     assert table[-1] == ['Raichu', 45, True, 14.0]
     assert table[-2] == ['Pikachu', 12, False, 12.2]
+
+
+def test_slice_range(table):
+    table[0:1]

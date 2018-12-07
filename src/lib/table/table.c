@@ -52,6 +52,7 @@ ResultPyObjectPtr qtb_table_item_(QtbTable *self, Py_ssize_t i) {
   PyObject *row;
   ResultPyObjectPtr result;
 
+  if (i < 0) i = self->size + i;
   if (i >= self->size) return ResultPyObjectPtrFailure(PyExc_IndexError, "table index out of range");
 
   row = PyList_New(self->width);

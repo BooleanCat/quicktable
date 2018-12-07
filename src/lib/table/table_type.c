@@ -57,6 +57,26 @@ static PySequenceMethods qtb_table_as_sequence = {
   0,  // sq_inplace_repeat
 };
 
+static PyObject *qtb_table_subscript(QtbTable *self, PyObject *key) {
+  Py_ssize_t i;
+
+  if PyIndex_Check(key) {
+    i = PyNumber_AsSsize_t(key, PyExc_IndexError);
+    if (i == -1 && PyErr_Occurred()) return NULL;
+
+    return qtb_table_item(self, i);
+  }
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyMappingMethods qtb_table_as_mapping = {
+  (lenfunc)qtb_table_length,  // mp_length
+  (binaryfunc)qtb_table_subscript,  // mp_subscript
+  0,  // mp_ass_subscript
+};
+
 static PyObject *qtb_table_append(QtbTable *self, PyObject *row) {
   Result result;
 
@@ -129,7 +149,7 @@ PyTypeObject QtbTableType = {
     (reprfunc)qtb_table_as_py_string,  // tp_repr
     0,  // tp_as_number
     &qtb_table_as_sequence,  // tp_as_sequence
-    0,  // tp_as_mapping
+    &qtb_table_as_mapping,  // tp_as_mapping
     0,  // tp_hash
     0,  // tp_call
     0,  // tp_str
